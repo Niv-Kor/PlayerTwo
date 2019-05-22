@@ -1,0 +1,6 @@
+The game is played with two players on a grid of 3x3.
+
+Each player is either X or O.
+Players take turns putting their marks in empty squares, and the first one to get 3 of his marks in a row (horizontally, vertically, or diagonally) is the winner.
+
+When all 9 squares are full, the game ends in a tie.
