@@ -157,12 +157,19 @@ public class CatchTheBunnySmart extends CatchTheBunny
 			return null;
 	}
 	
-	private boolean checkNotCorner(int compRow, int compCol, Keys direction) {
+	/**
+	 * Check wether a move is legal or not, considering the edges of the board. 
+	 * @param row - The current row before making a move
+	 * @param col - The current column before making a move
+	 * @param direction - The direction moving
+	 * @return true if the move towards the specified direction is legal or false otherwise.
+	 */
+	private boolean checkNotCorner(int row, int col, Keys direction) {
 		switch(direction) {
-			case UP: return compRow > 0;
-			case DOWN: return compRow < boardState.length - 1;
-			case LEFT: return compCol > 0;
-			case RIGHT: return compCol < boardState[0].length - 1;
+			case UP: return row > 0;
+			case DOWN: return row < boardState.length - 1;
+			case LEFT: return col > 0;
+			case RIGHT: return col < boardState[0].length - 1;
 			default: return false;
 		}
 	}
