@@ -158,7 +158,7 @@ public class CatchTheBunnySmart extends CatchTheBunny
 	}
 	
 	/**
-	 * Check wether a move is legal or not, considering the edges of the board. 
+	 * Check wether a move is legal or not, considering the edges of the board.
 	 * @param row - The current row before making a move
 	 * @param col - The current column before making a move
 	 * @param direction - The direction moving
