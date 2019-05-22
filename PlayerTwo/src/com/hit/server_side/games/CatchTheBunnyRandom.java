@@ -16,7 +16,7 @@ public class CatchTheBunnyRandom extends CatchTheBunny
 	
 	@Override
 	public void calcComputerMove() {
-		System.out.println("random");
+		System.out.println("random!");
 	}
 	
 	private GameMove findFreeSpot() {
