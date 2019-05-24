@@ -20,8 +20,9 @@ import com.hit.client_side.player.AITurn;
 import com.hit.client_side.player.Participant;
 import com.hit.client_side.player.TurnManager;
 import com.hit.server_side.game_algo.GameBoard.GameMove;
-import com.hit.utility.InteractiveIcon;
-import com.hit.utility.math.Percentage;
+
+import graphics.InteractiveIcon;
+import math.Percentage;
 
 public abstract class ClientSideController extends State
 {

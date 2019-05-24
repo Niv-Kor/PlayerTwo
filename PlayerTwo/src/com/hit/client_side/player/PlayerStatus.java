@@ -13,10 +13,11 @@ import javax.swing.JPanel;
 
 import com.hit.client_side.connection.ClientSideProtocol;
 import com.hit.client_side.player.Avatar.AvatarType;
-import com.hit.utility.files.FontHandler;
-import com.hit.utility.files.FontHandler.FontStyle;
 import com.hit.utility.math.RNG;
 import com.hit.utility.math.Range;
+
+import files.FontHandler;
+import files.FontHandler.FontStyle;
 
 public class PlayerStatus
 {

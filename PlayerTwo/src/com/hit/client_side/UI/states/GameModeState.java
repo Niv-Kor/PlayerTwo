@@ -7,7 +7,8 @@ import com.hit.client_side.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.client_side.UI.launcher.ClientSideGame.GameMode;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
-import com.hit.utility.InteractiveIcon;
+
+import graphics.InteractiveIcon;
 
 public class GameModeState extends ConfigState
 {

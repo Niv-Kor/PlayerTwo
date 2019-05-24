@@ -14,8 +14,9 @@ import com.hit.client_side.UI.launcher.ClientSideGame;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.server_side.game_algo.IGameAlgo.GameState;
 import com.hit.utility.OptionLabel;
-import com.hit.utility.files.ImageHandler;
 import com.hit.utility.math.Percentage;
+
+import files.ImageHandler;
 
 public class EndgameMessage extends State
 {

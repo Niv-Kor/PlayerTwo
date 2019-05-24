@@ -10,9 +10,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.hit.client_side.UI.Window;
-import com.hit.utility.files.FontHandler;
-import com.hit.utility.files.FontHandler.FontStyle;
 import com.hit.utility.math.Percentage;
+
+import files.FontHandler;
+import files.FontHandler.FontStyle;
 
 public class HeaderPanel extends FixedPanel
 {

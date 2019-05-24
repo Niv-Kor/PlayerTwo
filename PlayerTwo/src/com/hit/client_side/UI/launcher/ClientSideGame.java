@@ -10,8 +10,9 @@ import java.util.List;
 
 import com.hit.client_side.UI.launcher.Launcher.Substate;
 import com.hit.client_side.player.Participant;
-import com.hit.utility.files.FileLoader;
 import com.hit.utility.math.Range;
+
+import files.FileLoader;
 
 /**
  * Enum that contains all the games.

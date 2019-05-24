@@ -7,8 +7,9 @@ import java.awt.LayoutManager;
 import javax.swing.JPanel;
 
 import com.hit.client_side.UI.Window;
-import com.hit.utility.files.FontHandler;
-import com.hit.utility.files.FontHandler.FontStyle;
+
+import files.FontHandler;
+import files.FontHandler.FontStyle;
 
 public abstract class State
 {

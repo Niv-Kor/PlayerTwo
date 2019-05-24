@@ -13,9 +13,10 @@ import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
 import com.hit.utility.OptionLabel;
-import com.hit.utility.files.FontHandler;
-import com.hit.utility.files.FontHandler.FontStyle;
 import com.hit.utility.math.Percentage;
+
+import files.FontHandler;
+import files.FontHandler.FontStyle;
 
 public class GuidePanel extends FixedPanel
 {
