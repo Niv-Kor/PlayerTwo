@@ -18,10 +18,11 @@ import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
 import com.hit.client_side.player.Avatar;
+import com.hit.client_side.player.Avatar.AvatarType;
 import com.hit.client_side.player.Participant;
 import com.hit.client_side.player.PlayerStatus;
-import com.hit.client_side.player.Avatar.AvatarType;
-import com.hit.utility.math.Percentage;
+
+import general_utility.math.Percentage;
 
 public class IdentificationState extends ConfigState
 {

@@ -6,7 +6,8 @@ import javax.swing.JPanel;
 import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.fixed_panels.GuidePanel;
 import com.hit.client_side.UI.fixed_panels.HeaderPanel;
-import com.hit.utility.math.Percentage;
+
+import general_utility.math.Percentage;
 
 public abstract class ConfigState extends State
 {

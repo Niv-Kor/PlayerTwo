@@ -1,6 +1,5 @@
 package com.hit.client_side;
 import java.io.IOException;
-
 import com.hit.client_side.UI.ConfigWindow;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.client_side.UI.launcher.Launcher.Substate;

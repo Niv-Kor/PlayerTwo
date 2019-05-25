@@ -13,8 +13,9 @@ import com.hit.client_side.game_controlling.Cube;
 import com.hit.client_side.player.AITurn;
 import com.hit.client_side.player.Participant;
 import com.hit.client_side.player.TurnManager;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
-import com.hit.utility.math.Percentage;
+
+import game_algo.GameBoard.GameMove;
+import general_utility.math.Percentage;
 
 public class CatchTheBunnyCube extends Cube implements KeyListener
 {

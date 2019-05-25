@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.hit.client_side.UI.launcher.ClientSideGame;
+import com.hit.utility.PortGenerator;
 
 public class ClientSideProtocol
 {
@@ -29,6 +30,7 @@ public class ClientSideProtocol
 		private Timer timer;
 		private TimerTask task;
 		private boolean started;
+		private JSON wakeUpMessage;
 		
 		/**
 		 * @see constructor ServerProtocol(boolean initWaker)
@@ -37,6 +39,8 @@ public class ClientSideProtocol
 		public Waker(ClientSideProtocol tiredProt) throws IOException {
 			super(false);
 			
+			this.wakeUpMessage = new JSON("wakeup");
+			
 			//retrieve the tired protocol's port as the target port
 			this.target = tiredProt.getPort();			
 			
@@ -44,7 +48,7 @@ public class ClientSideProtocol
 			this.task = new TimerTask() {
 				@Override
 				public void run() {
-					try { send("wakeup:");	}
+					try { send(wakeUpMessage); }
 					catch(IOException e) { e.printStackTrace(); }
 				}
 			};
@@ -61,7 +65,7 @@ public class ClientSideProtocol
 		}
 	}
 	
-	protected static List<HashMap<String, String[]>> buffers = new ArrayList<HashMap<String, String[]>>();
+	protected static List<HashMap<String, JSON>> buffers = new ArrayList<HashMap<String, JSON>>();
 	protected InetAddress serverAddress;
 	protected DatagramSocket socket;
 	protected Integer port, target;
@@ -114,30 +118,31 @@ public class ClientSideProtocol
 	}
 	
 	/**
-	 * Send a String message to the target port.
+	 * Send a JSON message to the target port.
 	 * 
 	 * @param msg - The message to send
 	 * @throws IOException when the target port is unavailable for sending messages to.
 	 */
-	public void send(String msg) throws IOException {
-		byte[] data = msg.getBytes();
+	public void send(JSON msg) throws IOException {
+		byte[] data = msg.toString().getBytes();
 		DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, target);
 		socket.send(packet);
 	}
 	
 	/**
-	 * Receive a message from the target port.
+	 * Receive a JSON message from the target port.
 	 * This is a dangerous method and can cause starvation if not handled carefully.
+	 * Initiating a waker is recommended for such cases.
 	 * 
 	 * @return an array of the message parts, where the first part is the request string.
 	 * @throws IOException when the target port is unavailable for receiving messages from.
 	 */
-	private String[] receive() throws IOException {
+	private JSON receive() throws IOException {
 		byte[] data = new byte[1024];
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		socket.receive(packet);
 		String message = new String(packet.getData(), 0, packet.getLength());
-		return message.split(":");
+		return new JSON(message);
 	}
 	
 	/**
@@ -146,31 +151,31 @@ public class ClientSideProtocol
 	 * it's not thrown away, but rather waiting in a buffer where it can be found later.
 	 * If any of the requests get a compatible answer, that's enough to exit the method. 
 	 * 
-	 * @param prefix - Array of all the requests from the target port
+	 * @param keys - Array of all the requests from the target port
 	 * @return any of the requests sent (whichever message is recieved first).
 	 * @throws IOException when the target port is unavailable for receiving messages from.
 	 */
-	public String[] waitFor(String[] prefix) throws IOException {
+	public JSON waitFor(String[] keys) throws IOException {
 		//open local buffer
-		HashMap<String, String[]> localBuffer = new HashMap<String, String[]>();
+		HashMap<String, JSON> localBuffer = new HashMap<String, JSON>();
 		buffers.add(localBuffer);
-		return waitFor(prefix, localBuffer);
+		return waitFor(keys, localBuffer);
 	}
 	
 	/**
-	 * @see waitFor(String[] prefix)
+	 * @see waitFor(String[] keys)
 	 * @param localBuffer - Sent to this private overloading method by the public version
 	 */
-	private String[] waitFor(String[] prefix, HashMap<String, String[]> localBuffer) throws IOException {
-		String[] answer = receive();
+	private JSON waitFor(String[] keys, HashMap<String, JSON> localBuffer) throws IOException {
+		JSON answer = receive();
 		
 		//received an answer - check if it's compatible with one of the requests
-		for (String pre : prefix) {
+		for (String key : keys) {
 			//the answer is compatible - return it
-			if (answer[0].equals(pre.split(":")[0])) {
+			if (answer.getType().equals(key)) {
 				
 				//spread the local buffer's content to all other buffers and delete it
-				for (HashMap<String, String[]> otherBuffer : buffers)
+				for (HashMap<String, JSON> otherBuffer : buffers)
 					if (otherBuffer != localBuffer) otherBuffer.putAll(localBuffer);
 				
 				buffers.remove(localBuffer);
@@ -178,17 +183,17 @@ public class ClientSideProtocol
 			}
 			
 			//the answer is useless - spread it to all other buffers
-			for (HashMap<String, String[]> otherBuffer : buffers)
-				if (otherBuffer != localBuffer && !otherBuffer.containsKey(answer[0]))
-					otherBuffer.put(answer[0], answer);
+			for (HashMap<String, JSON> otherBuffer : buffers)
+				if (otherBuffer != localBuffer && !otherBuffer.containsKey(answer.getType()))
+					otherBuffer.put(answer.getType(), answer);
 		}
 		
-		//check if locsl buffer has the compatible answer
-		for (String pre : prefix)
+		//check if local buffer has the compatible answer
+		for (String pre : keys)
 			if (localBuffer.containsKey(pre))
 				return localBuffer.get(pre);
 		
-		return waitFor(prefix, localBuffer);
+		return waitFor(keys, localBuffer);
 	}
 	
 	/**
@@ -199,9 +204,9 @@ public class ClientSideProtocol
 	 * @return an answer for the request.
 	 * @throws IOException when the target port is unavailable.
 	 */
-	public String[] request(String msg) throws IOException {
+	public JSON request(JSON msg) throws IOException {
 		//open local buffer
-		HashMap<String, String[]> localBuffer = new HashMap<String, String[]>();
+		HashMap<String, JSON> localBuffer = new HashMap<String, JSON>();
 		buffers.add(localBuffer);
 		
 		return stubbornRequest(msg, localBuffer);
@@ -211,16 +216,16 @@ public class ClientSideProtocol
 	 * @see request(String msg)
 	 * @param localBuffer - Sent to this private overloading method by the public version
 	 */
-	private String[] stubbornRequest(String responseTo, HashMap<String, String[]> localBuffer) throws IOException {
-		String expectedKey = responseTo.split(":")[0];
+	private JSON stubbornRequest(JSON responseTo, HashMap<String, JSON> localBuffer) throws IOException {
+		String expectedType = responseTo.getType();
 		
 		send(responseTo);
-		String[] answer = receive();
+		JSON answer = receive();
 		
 		//check that the answer is compatible with the request
-		if (answer[0].equals(expectedKey)) {
+		if (answer.getType().equals(expectedType)) {
 			//spread the local buffer's content to all other buffers and delete it
-			for (HashMap<String, String[]> otherBuffer : buffers)
+			for (HashMap<String, JSON> otherBuffer : buffers)
 				if (otherBuffer != localBuffer) otherBuffer.putAll(localBuffer);
 			
 			buffers.remove(localBuffer);
@@ -228,13 +233,13 @@ public class ClientSideProtocol
 		}
 		else {
 			//the answer is useless - spread it to all other buffers
-			for (HashMap<String, String[]> otherBuffer : buffers)
-				if (otherBuffer != localBuffer && !otherBuffer.containsKey(answer[0]))
-					otherBuffer.put(answer[0], answer);
+			for (HashMap<String, JSON> otherBuffer : buffers)
+				if (otherBuffer != localBuffer && !otherBuffer.containsKey(answer.getType()))
+					otherBuffer.put(answer.getType(), answer);
 			
 			//check if local buffer has the compatible answer
-			if (localBuffer.containsKey(expectedKey))
-				return localBuffer.get(expectedKey);
+			if (localBuffer.containsKey(expectedType))
+				return localBuffer.get(expectedType);
 			
 			//try again
 			return stubbornRequest(responseTo, localBuffer);
@@ -248,7 +253,12 @@ public class ClientSideProtocol
 	 */
 	public void connectServer(ClientSideGame game) throws IOException {
 		target = PortGenerator.CLIENT_FINDER;
-		target = Integer.parseInt(request("hello:" + game.name() + ":" + port + ":")[1]); //assign with new target
+		JSON message = new JSON("new_client");
+		message.put("game", game.name());
+		message.put("port", port);
+		
+		JSON answer = request(message);
+		target = answer.getInt("port");
 	}
 	
 	/**
@@ -258,7 +268,11 @@ public class ClientSideProtocol
 	 */
 	public void disconnectServer(ClientSideGame game) throws IOException {
 		target = PortGenerator.CLIENT_FINDER;
-		send("bye:" + game.name() + ":" + port + ":");
+		JSON message = new JSON("leaving_client");
+		message.put("game", game.name());
+		message.put("port", port);
+		send(message);
+		
 		disconnect();
 	}
 	

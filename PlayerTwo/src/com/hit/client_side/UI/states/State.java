@@ -8,8 +8,8 @@ import javax.swing.JPanel;
 
 import com.hit.client_side.UI.Window;
 
-import files.FontHandler;
-import files.FontHandler.FontStyle;
+import general_utility.files.FontHandler;
+import general_utility.files.FontHandler.FontStyle;
 
 public abstract class State
 {

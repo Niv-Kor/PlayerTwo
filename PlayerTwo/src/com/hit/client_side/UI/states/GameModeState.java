@@ -2,13 +2,14 @@ package com.hit.client_side.UI.states;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.concurrent.Callable;
+
 import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.client_side.UI.launcher.ClientSideGame.GameMode;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
 
-import graphics.InteractiveIcon;
+import general_utility.graphics.InteractiveIcon;
 
 public class GameModeState extends ConfigState
 {

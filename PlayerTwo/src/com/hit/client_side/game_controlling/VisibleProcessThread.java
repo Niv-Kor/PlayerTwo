@@ -1,6 +1,7 @@
 package com.hit.client_side.game_controlling;
 import java.io.IOException;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
+import com.hit.client_side.connection.JSON;
+import game_algo.GameBoard.GameMove;
 
 public class VisibleProcessThread extends ProcessThread
 {
@@ -9,36 +10,48 @@ public class VisibleProcessThread extends ProcessThread
 	}
 	
 	public void makeMove(GameMove move) throws IOException {
-		protocol.send("move:" + move.getRow() + ":" + move.getColumn() + ":");
+		JSON message = new JSON("player_move");
+		message.put("row", move.getRow());
+		message.put("column", move.getColumn());
+		protocol.send(message);
+		delay(100);
+	}
+	
+	public void randomMove() throws IOException {
+		JSON message = new JSON("player_random");
+		protocol.send(message);
 		delay(100);
 	}
 	
 	public void makeCompMove() throws IOException {
-		protocol.send("compmove:");
+		JSON message = new JSON("computer_move");
+		protocol.send(message);
+		delay(100);
+	}
+	
+	public void placePlayer(GameMove move) throws IOException {
+		JSON message = new JSON("place_player");
+		message.put("row", move.getRow());
+		message.put("column", move.getColumn());
+		protocol.send(message);
 		delay(100);
 	}
 	
 	public void placeComp(GameMove move) throws IOException {
-		protocol.send("placecomp:" + move.getRow() + ":" + move.getColumn() + ":");
+		JSON message = new JSON("place_computer");
+		message.put("row", move.getRow());
+		message.put("column", move.getColumn());
+		protocol.send(message);
 		delay(100);
 	}
 	
 	public char getSign() throws IOException {
-		return protocol.request("getsign:")[1].charAt(0);
-		
+		JSON message = new JSON("player_sign");
+		return protocol.request(message).getChar("sign");
 	}
 	
 	public char getOtherPlayerSign() throws IOException {
-		return protocol.request("p2getsign:")[1].charAt(0);
-	}
-	
-	public void tryEndgame() throws IOException {
-		protocol.send("tryend:");
-		delay(100);
-	}
-	
-	private void delay(long millisec) {
-		try { Thread.sleep(millisec); }
-		catch (InterruptedException e) { e.printStackTrace(); }
+		JSON message = new JSON("player2_sign");
+		return protocol.request(message).getChar("sign");
 	}
 }

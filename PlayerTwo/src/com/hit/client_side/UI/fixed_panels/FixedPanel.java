@@ -2,10 +2,12 @@ package com.hit.client_side.UI.fixed_panels;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
+
 import javax.swing.JPanel;
 
 import com.hit.client_side.UI.Window;
-import com.hit.utility.math.Percentage;
+
+import general_utility.math.Percentage;
 
 public abstract class FixedPanel extends JPanel
 {

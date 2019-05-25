@@ -20,12 +20,12 @@ import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.client_side.UI.launcher.ClientSideGame;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
-import com.hit.utility.math.Percentage;
 
-import files.FontHandler;
-import files.ImageHandler;
-import files.FontHandler.FontStyle;
-import graphics.InteractiveIcon;
+import general_utility.files.FontHandler;
+import general_utility.files.FontHandler.FontStyle;
+import general_utility.files.ImageHandler;
+import general_utility.graphics.InteractiveIcon;
+import general_utility.math.Percentage;
 
 public class GamePickerState extends ConfigState
 {

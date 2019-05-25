@@ -7,8 +7,9 @@ import com.hit.client_side.UI.launcher.ClientSideGame.GameMode;
 import com.hit.client_side.game_controlling.ClientSideController;
 import com.hit.client_side.game_controlling.Cube;
 import com.hit.client_side.player.Participant;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
-import com.hit.utility.math.Range;
+
+import game_algo.GameBoard.GameMove;
+import general_utility.math.Range;
 
 public class CatchTheBunnyController extends ClientSideController
 {

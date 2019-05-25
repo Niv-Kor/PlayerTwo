@@ -19,10 +19,10 @@ import com.hit.client_side.UI.states.State;
 import com.hit.client_side.player.AITurn;
 import com.hit.client_side.player.Participant;
 import com.hit.client_side.player.TurnManager;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
 
-import graphics.InteractiveIcon;
-import math.Percentage;
+import game_algo.GameBoard.GameMove;
+import general_utility.graphics.InteractiveIcon;
+import general_utility.math.Percentage;
 
 public abstract class ClientSideController extends State
 {
@@ -68,7 +68,7 @@ public abstract class ClientSideController extends State
 		dice.setFunction(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				Participant.PLAYER_1.getStatus().getProtocol().send("random:");
+				visibleProcess.randomMove();
 				return null;
 			}
 		});

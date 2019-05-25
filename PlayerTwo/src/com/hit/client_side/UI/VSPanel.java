@@ -13,9 +13,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.hit.client_side.player.Participant;
-import com.hit.utility.math.Percentage;
 
-import files.ImageHandler;
+import general_utility.files.ImageHandler;
+import general_utility.math.Percentage;
 
 public class VSPanel extends JPanel
 {

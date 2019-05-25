@@ -1,6 +1,7 @@
 package com.hit.client_side.player;
 import java.io.IOException;
-import com.hit.utility.math.RNG;
+
+import general_utility.math.RNG;
 
 public enum Participant {
 	PLAYER_1(true),

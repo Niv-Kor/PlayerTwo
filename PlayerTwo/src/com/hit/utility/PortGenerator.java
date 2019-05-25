@@ -1,14 +1,15 @@
-package com.hit.client_side.connection;
+package com.hit.utility;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import com.hit.utility.math.Range;
+
+import general_utility.math.RNG;
 
 public class PortGenerator
 {
-	private static final Range<Integer> PORT_RANGE = new Range<Integer>(1, 10_000);
-	public static final int GENERAL_SERVICE = 1000;
-	public static final int CLIENT_FINDER = 1001;
-	public static final int LAUNCHER_APPLICANT = 1002;
+	public static final int GENERAL_SERVICE = 1024;
+	public static final int CLIENT_FINDER = 1025;
+	private static final int MIN_PORT = 1026;
+	private static final int MAX_PORT = (int) Character.MAX_VALUE;
 	
 	/**
 	 * Generate an available port number, ready for connection.
@@ -21,8 +22,7 @@ public class PortGenerator
 		//test ports until one manages to connect
 		while (true) {
 			try {
-				do port = (int) PORT_RANGE.generate();
-				while (port == GENERAL_SERVICE || port == CLIENT_FINDER || port == LAUNCHER_APPLICANT);
+				port = RNG.generate(MIN_PORT, MAX_PORT);
 				testSocket = new DatagramSocket(port);
 				testSocket.close();
 				break;

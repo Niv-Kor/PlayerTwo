@@ -7,7 +7,8 @@ import com.hit.client_side.UI.launcher.ClientSideGame;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
 import com.hit.client_side.UI.states.EndgameMessage;
-import com.hit.server_side.game_algo.IGameAlgo.GameState;
+
+import game_algo.IGameAlgo.GameState;
 
 public class EndgameProtocol
 {

@@ -17,6 +17,7 @@ import com.hit.client_side.UI.states.GamePickerState;
 import com.hit.client_side.UI.states.IdentificationState;
 import com.hit.client_side.UI.states.State;
 import com.hit.client_side.connection.ClientSideProtocol;
+import com.hit.client_side.connection.JSON;
 import com.hit.client_side.game_controlling.ClientSideController;
 import com.hit.client_side.game_controlling.catch_the_bunny.CatchTheBunnyController;
 import com.hit.client_side.game_controlling.tic_tac_toe.TicTacToeController;
@@ -85,10 +86,10 @@ public class Launcher {
 	
 	/**
 	 * A way to save both the window and the state that's running on it, and easily find it.
-	 * WindowCache should be created everytime a state is applied to any window,
-	 * and should be deleted everytime the state on that window is changed,
+	 * WindowCache should be created every time a state is applied to any window,
+	 * and should be deleted every time the state on that window is changed,
 	 * or perhaps when that window is closed. 
-	 * @author Korach
+	 * @author Niv Kor
 	 */
 	public static class WindowCache
 	{
@@ -155,19 +156,17 @@ public class Launcher {
 			//wait for a signal from server that the game can be started
 			ClientSideProtocol player1Prot = Participant.PLAYER_1.getStatus().getProtocol();
 			
-			String[] requests = {"start"};
-			String[] receivedMsg = player1Prot.waitFor(requests);
+			String[] requests = {"start_game"};
+			JSON receivedMsg = player1Prot.waitFor(requests);
 			
 			//continue only if the correct game is starting
-			if (receivedMsg[1].equals(game.name())) {
-				switch(receivedMsg[2]) {
-					case "getturn": game.setFirstTurnParticipant(Participant.PLAYER_1); break;
-					case "noturn": {
-						//other player gets the turn
-						switch(mode) {
-							case SINGLE_PLAYER: game.setFirstTurnParticipant(Participant.COMPUTER); break;
-							case MULTIPLAYER: game.setFirstTurnParticipant(Participant.PLAYER_2); break;
-						}
+			if (receivedMsg.getString("game").equals(game.name())) {
+				boolean firstTurn = receivedMsg.getBoolean("turn");
+				if (firstTurn) game.setFirstTurnParticipant(Participant.PLAYER_1);
+				else {
+					switch(mode) {
+						case SINGLE_PLAYER: game.setFirstTurnParticipant(Participant.COMPUTER); break;
+						case MULTIPLAYER: game.setFirstTurnParticipant(Participant.PLAYER_2); break;
 					}
 				}
 			}
@@ -181,7 +180,7 @@ public class Launcher {
 	}
 	
 	/**
-	 * Get the cahce that contains a currenly open window with some state.
+	 * Get the cache that contains a currently open window with some state.
 	 * @param window - Currently open window to get its cache
 	 * @return cache of that window.
 	 */
@@ -193,7 +192,7 @@ public class Launcher {
 	}
 	
 	/**
-	 * Get the cahce that contains a currenly open window with a running game in it.
+	 * Get the cache that contains a currently open window with a running game in it.
 	 * @param game - Running game to get its window's cache
 	 * @return cache of that game's open window. null if the game is currently not running.
 	 */
@@ -232,9 +231,9 @@ public class Launcher {
 		gameWindow.dispose();
 		windowCacheList.remove(cache);
 		
-		//disconnet
+		//disconnect
 		try {
-			//disconnet player from the game's server
+			//disconnect player from the game's server
 			Participant.PLAYER_1.getStatus().getProtocol().disconnectServer(game);
 			
 			//if needed, disconnect the computer player too

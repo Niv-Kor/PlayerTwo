@@ -12,11 +12,11 @@ import javax.swing.JPanel;
 import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.launcher.Launcher;
 import com.hit.client_side.UI.launcher.Launcher.Substate;
-import com.hit.utility.OptionLabel;
-import com.hit.utility.math.Percentage;
 
-import files.FontHandler;
-import files.FontHandler.FontStyle;
+import general_utility.files.FontHandler;
+import general_utility.files.FontHandler.FontStyle;
+import general_utility.graphics.InteractiveLabel;
+import general_utility.math.Percentage;
 
 public class GuidePanel extends FixedPanel
 {
@@ -49,7 +49,7 @@ public class GuidePanel extends FixedPanel
 	private static final Font FONT = FontHandler.load("Comfortaa", FontStyle.PLAIN, 14);
 	public static final double HEIGHT_PERCENT = 10;
 	
-	private OptionLabel back, next;
+	private InteractiveLabel back, next;
 	private JPanel mainPanel;
 	private JLabel delimeter;
 	
@@ -65,7 +65,7 @@ public class GuidePanel extends FixedPanel
 		mainPanel.setBackground(COLOR);
 		add(mainPanel, BorderLayout.CENTER);
 		
-		this.back = new OptionLabel("BACK");
+		this.back = new InteractiveLabel("BACK");
 		back.setForeground(Color.WHITE);
 		back.setFont(FONT);
 		back.enableSelectionColor(false);
@@ -74,7 +74,7 @@ public class GuidePanel extends FixedPanel
 		delimeter.setForeground(Color.WHITE.darker());
 		delimeter.setFont(new Font(FONT.getFontName(), Font.PLAIN, FONT.getSize() + 3));
 		
-		this.next = new OptionLabel("NEXT");
+		this.next = new InteractiveLabel("NEXT");
 		next.setForeground(Color.WHITE);
 		next.setFont(FONT);
 		next.enableSelectionColor(false);
@@ -90,7 +90,7 @@ public class GuidePanel extends FixedPanel
 	 * @param landingState - The state to land at as a target
 	 */
 	public void setTarget(Flow flow, Window window, Substate landingState) {
-		OptionLabel label = null;
+		InteractiveLabel label = null;
 		
 		switch(flow) {
 			case BACK: label = back; break;
@@ -110,7 +110,7 @@ public class GuidePanel extends FixedPanel
 	 * @param flow - The button
 	 * @return the button as an OptionLabel object
 	 */
-	public OptionLabel getLabel(Flow flow) {
+	public InteractiveLabel getLabel(Flow flow) {
 		switch(flow) {
 			case BACK: return back;
 			case NEXT: return next;

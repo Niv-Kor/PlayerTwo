@@ -8,7 +8,8 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import com.hit.client_side.player.TurnManager;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
+
+import game_algo.GameBoard.GameMove;
 
 public abstract class Cube extends JPanel
 {

@@ -9,7 +9,8 @@ import com.hit.client_side.game_controlling.Cube;
 import com.hit.client_side.player.AITurn;
 import com.hit.client_side.player.Participant;
 import com.hit.client_side.player.TurnManager;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
+
+import game_algo.GameBoard.GameMove;
 
 public class TicTacToeCube extends Cube implements MouseListener
 {

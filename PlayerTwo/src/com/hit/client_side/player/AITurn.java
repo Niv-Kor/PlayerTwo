@@ -4,7 +4,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.hit.client_side.game_controlling.ClientSideController;
-import com.hit.utility.math.Range;
+
+import general_utility.math.Range;
 
 public class AITurn
 {

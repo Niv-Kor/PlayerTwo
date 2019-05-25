@@ -1,6 +1,7 @@
 package com.hit.client_side.player;
 import com.hit.client_side.UI.VSPanel;
-import com.hit.utility.math.RNG;
+
+import general_utility.math.RNG;
 
 /**
  * Manage turn changing.

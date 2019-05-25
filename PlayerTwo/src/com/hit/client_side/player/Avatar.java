@@ -11,10 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 
-import com.hit.utility.math.RNG;
-import com.hit.utility.math.Range;
-
-import files.ImageHandler;
+import general_utility.files.ImageHandler;
+import general_utility.math.RNG;
+import general_utility.math.Range;
 
 public class Avatar extends JLabel
 {

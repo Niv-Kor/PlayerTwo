@@ -1,9 +1,12 @@
 package com.hit.client_side.game_controlling;
 import java.io.IOException;
+
 import com.hit.client_side.UI.EndgameProtocol;
 import com.hit.client_side.UI.launcher.ClientSideGame;
-import com.hit.server_side.game_algo.GameBoard.GameMove;
-import com.hit.server_side.game_algo.IGameAlgo.GameState;
+import com.hit.client_side.connection.JSON;
+
+import game_algo.GameBoard.GameMove;
+import game_algo.IGameAlgo.GameState;
 
 public class HiddenProcessThread extends ProcessThread
 {
@@ -15,23 +18,25 @@ public class HiddenProcessThread extends ProcessThread
 	public void run() {
 		while(!isInterrupted()) {
 			try {
-				String[] requests = {"p2move", "end"};
-				String[] msg = protocol.waitFor(requests);
+				String[] requests = {"player2_move", "end_game"};
+				JSON msg = protocol.waitFor(requests);
 				
-				switch(msg[0]) {
-					case "p2move": {
-						int row = Integer.parseInt(msg[1]);
-						int col = Integer.parseInt(msg[2]);
+				switch(msg.getType()) {
+					case "player2_move": {
+						int row = msg.getInt("row");
+						int col = msg.getInt("column");
 						GameMove player2move = new GameMove(row, col);
 						controller.getCube(player2move).updateOtherPlayer(player2move);
+						
 						break;
 					}
-					case "end": {
+					case "end_game": {
 						//check if it's THIS game's ending
-						ClientSideGame referencedGame = ClientSideGame.valueOf(msg[1]);
+						ClientSideGame referencedGame = ClientSideGame.valueOf(msg.getString("game"));
 						if (referencedGame != game) break;
 						
-						GameState gameState = GameState.valueOf(msg[2]);
+						GameState gameState = GameState.valueOf(msg.getString("state"));
+						System.out.println("game state is " + gameState);
 						
 						//pop an endgame window
 						EndgameProtocol.pop(referencedGame, gameState);

@@ -12,11 +12,11 @@ import javax.swing.JPanel;
 import com.hit.client_side.UI.Window;
 import com.hit.client_side.UI.launcher.ClientSideGame;
 import com.hit.client_side.UI.launcher.Launcher;
-import com.hit.server_side.game_algo.IGameAlgo.GameState;
-import com.hit.utility.OptionLabel;
-import com.hit.utility.math.Percentage;
 
-import files.ImageHandler;
+import game_algo.IGameAlgo.GameState;
+import general_utility.files.ImageHandler;
+import general_utility.graphics.InteractiveLabel;
+import general_utility.math.Percentage;
 
 public class EndgameMessage extends State
 {
@@ -84,7 +84,7 @@ public class EndgameMessage extends State
 		panes[0].add(label, constraints);
 		
 		//button that enables the user to restart the game
-		OptionLabel playAgain = new OptionLabel("Play Again");
+		InteractiveLabel playAgain = new InteractiveLabel("Play Again");
 		playAgain.enableSelectionColor(false);
 		playAgain.setForeground(Color.WHITE);
 		playAgain.setFont(State.LABEL_FONT);
@@ -103,7 +103,7 @@ public class EndgameMessage extends State
 		panes[1].add(playAgain, constraints);
 		
 		//button that exits the current game that's open
-		OptionLabel quit = new OptionLabel("Quit");
+		InteractiveLabel quit = new InteractiveLabel("Quit");
 		quit.enableSelectionColor(false);
 		quit.setForeground(Color.WHITE);
 		quit.setFont(State.LABEL_FONT);
