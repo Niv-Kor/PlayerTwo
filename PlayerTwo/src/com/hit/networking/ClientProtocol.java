@@ -1,19 +1,16 @@
 package com.hit.networking;
 import java.io.IOException;
 import java.net.SocketException;
+
 import com.hit.game_launch.Game;
+
 import javaNK.util.networking.JSON;
 import javaNK.util.networking.PortGenerator;
 import javaNK.util.networking.Protocol;
 
 public class ClientProtocol extends Protocol
 {
-	/**
-	 * @throws IOException when the socket cannot connect to the host.
-	 */
-	public ClientProtocol() throws IOException {
-		super(true);
-	}
+	public ClientProtocol() throws IOException {}
 	
 	/**
 	 * @param port - The port this protocol will use
@@ -34,13 +31,13 @@ public class ClientProtocol extends Protocol
 		try { connect(); }
 		catch(SocketException e) {}
 		
-		target = PortGenerator.getAllocated("server_port");
+		setTargetPort(PortGenerator.getAllocated("server_port"));
 		JSON message = new JSON("new_client");
 		message.put("game", game.name());
-		message.put("port", port);
+		message.put("port", getPort());
 		
 		JSON answer = request(message);
-		target = answer.getInt("port");
+		setTargetPort(answer.getInt("port"));
 	}
 	
 	/**
@@ -49,24 +46,24 @@ public class ClientProtocol extends Protocol
 	 * @throws IOException when the server port is unavailable.
 	 */
 	public void disconnectServer(Game game) throws IOException {
-		target = PortGenerator.getAllocated("server_port");
+		setTargetPort(PortGenerator.getAllocated("server_port"));
 		JSON message = new JSON("leaving_client");
 		message.put("game", game.name());
-		message.put("port", port);
+		message.put("port", getPort());
 		send(message);
 		
 		disconnect();
 	}
 	
 	public void renewGame(Game game) throws IOException {
-		int oldProtocol = target;
+		int oldProtocol = getTargetPort();
 		
-		target = PortGenerator.getAllocated("server_port");
+		setTargetPort(PortGenerator.getAllocated("server_port"));
 		JSON message = new JSON("happy_client");
 		message.put("game", game.name());
-		message.put("port", port);
+		message.put("port", getPort());
 		send(message);
 		
-		target = oldProtocol;
+		setTargetPort(oldProtocol);
 	}
 }

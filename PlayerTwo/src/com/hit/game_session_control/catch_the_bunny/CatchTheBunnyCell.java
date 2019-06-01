@@ -39,7 +39,7 @@ public class CatchTheBunnyCell extends BoardCell implements KeyListener
 			targetCube.placePlayer(Participant.PLAYER_1);
 			
 			//make the move
-			controller.getVisibleProcess().makeMove(move);
+			controller.getCommunicator().makeMove(move);
 			
 			//move focus to the target cube
 			Window gameWindow = controller.getWindow();
@@ -49,7 +49,7 @@ public class CatchTheBunnyCell extends BoardCell implements KeyListener
 			//end turn
 			turnManager.next();
 			controller.enableRandomButton(false);
-			controller.getVisibleProcess().tryEndgame();
+			controller.getCommunicator().tryEndgame();
 		}
 		catch(IOException e) { e.printStackTrace(); }
 		
@@ -77,7 +77,7 @@ public class CatchTheBunnyCell extends BoardCell implements KeyListener
 			//end turn
 			turnManager.next();
 			controller.enableRandomButton(true);
-			controller.getVisibleProcess().tryEndgame();
+			controller.getCommunicator().tryEndgame();
 		}
 		catch(IOException e) { e.printStackTrace(); }
 	}

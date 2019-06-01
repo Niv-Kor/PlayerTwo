@@ -243,10 +243,8 @@ public class VSPanel extends JPanel
 	 * @param player - The player that gets the next turn
 	 */
 	public void setPlayerTurn(Participant player) {
-		for (PlayerProperty property : playersProperty) {
-			if (property.getPlayer() == player) property.activate(true);
-			else property.activate(false);
-		}
+		for (PlayerProperty property : playersProperty)
+			property.activate(property.getPlayer() == player);
 	}
 	
 	/**

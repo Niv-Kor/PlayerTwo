@@ -15,7 +15,7 @@ public class CatchTheBunnyController extends Controller
 {
 	private GameMove otherPlayerSpot;
 	
-	public CatchTheBunnyController(Window window) {
+	public CatchTheBunnyController(Window window) throws IOException {
 		super(window);
 		initPositions();
 	}
@@ -52,7 +52,7 @@ public class CatchTheBunnyController extends Controller
 			playerSpot = new GameMove(freeSpot.getRow(), freeSpot.getColumn());
 			bunnyCube.requestFocus();
 			bunnyCube.placePlayer(Participant.PLAYER_1);
-			visibleProcess.makeMove(playerSpot);
+			serverCommunicator.makeMove(playerSpot);
 		}
 		catch(IOException e) { e.printStackTrace(); }
 		
@@ -74,7 +74,7 @@ public class CatchTheBunnyController extends Controller
 			try {
 				GameMove compSpot = new GameMove(freeSpot.getRow(), freeSpot.getColumn());
 				bunnyCube.placePlayer(Participant.COMPUTER);
-				visibleProcess.placeComp(compSpot);
+				serverCommunicator.placeComp(compSpot);
 				setOtherPlayerSpot(compSpot);
 			}
 			catch(IOException e) { e.printStackTrace(); }

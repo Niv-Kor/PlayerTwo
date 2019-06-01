@@ -14,15 +14,18 @@ public class AITurn
 	private TimerTask task;
 	private TurnManager turnManager;
 	private Range<Double> responseTime;
+	private static int counter = 0;
 	
 	public AITurn(TurnManager turnManager, Controller controller) {
+		System.out.println("AITurn #" + counter++);
+		
 		this.responseTime = controller.getRelatedGame().getResponseTime();
 		this.turnManager = turnManager;
 		this.task = new TimerTask() {
 			@Override
 			public void run() {
 				Logger.print("AI turn");
-				try { controller.getVisibleProcess().makeCompMove(); }
+				try { controller.getCommunicator().makeCompMove(); }
 				catch(IOException e) { e.printStackTrace(); }
 			}
 		};
@@ -44,7 +47,7 @@ public class AITurn
 	
 	/**
 	 * Simulate the computer's thinking process with a random delay,
-	 * which is optimizely between 0.8 and 2.2 seconds.
+	 * which is optimally between 0.8 and 2.2 seconds.
 	 */
 	public void thinkAndExecute() {
 		thinkAndExecute(responseTime.generate());

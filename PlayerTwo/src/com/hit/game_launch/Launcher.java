@@ -156,6 +156,7 @@ public class Launcher {
 			
 			String[] requests = {"start_game"};
 			JSON receivedMsg = player1Prot.waitFor(requests);
+			System.out.println("in launcher its " + receivedMsg);
 			
 			//continue only if the correct game is starting
 			if (receivedMsg.getString("game").equals(game.name())) {

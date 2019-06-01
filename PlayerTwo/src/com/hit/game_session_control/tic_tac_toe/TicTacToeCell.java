@@ -2,14 +2,12 @@ package com.hit.game_session_control.tic_tac_toe;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-
+import com.hit.game_launch.Game.GameMode;
+import com.hit.game_session_control.BoardCell;
 import com.hit.game_session_control.Controller;
 import com.hit.game_session_control.TurnManager;
 import com.hit.players.AITurn;
 import com.hit.players.Participant;
-import com.hit.game_launch.Game.GameMode;
-import com.hit.game_session_control.BoardCell;
-
 import game_algo.GameBoard.GameMove;
 
 public class TicTacToeCell extends BoardCell implements MouseListener
@@ -27,22 +25,27 @@ public class TicTacToeCell extends BoardCell implements MouseListener
 		boolean gameEnded = false;
 		
 		try {
-			controller.getVisibleProcess().makeMove(move);
-			sign.setForeground(PLAYER_1_COLOR);
-			sign.setText("" + controller.getVisibleProcess().getSign());
+			boolean success = controller.getCommunicator().makeMove(move);
 			
-			//end turn
-			turnManager.next();
-			controller.enableRandomButton(false);
-			gameEnded = controller.getVisibleProcess().tryEndgame();
+			if (success) {
+				//end turn
+				turnManager.next();
+				controller.enableRandomButton(false);
+				
+				sign.setForeground(PLAYER_1_COLOR);
+				sign.setText("" + controller.getCommunicator().getSign());
+				
+				//try to finish game
+				gameEnded = controller.getCommunicator().tryEndgame();
+				
+				//trigger computer move if needed
+				if (!gameEnded && controller.getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER) {
+					AITurn compTurn = new AITurn(turnManager, controller);
+					compTurn.thinkAndExecute();
+				}
+			}
 		}
 		catch(IOException e) { e.printStackTrace(); }
-		
-		//trigger computer move if needed
-		if (!gameEnded && controller.getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER) {
-			AITurn compTurn = new AITurn(turnManager, controller);
-			compTurn.thinkAndExecute();
-		}
 	}
 	
 	@Override
@@ -50,13 +53,15 @@ public class TicTacToeCell extends BoardCell implements MouseListener
 		if (turnManager.is(Participant.PLAYER_1) || !enabled) return;
 		
 		try {
-			sign.setForeground(PLAYER_2_COLOR);
-			sign.setText("" + controller.getVisibleProcess().getOtherPlayerSign());
-			
 			//end turn
 			turnManager.next();
 			controller.enableRandomButton(true);
-			controller.getVisibleProcess().tryEndgame();
+			
+			sign.setForeground(PLAYER_2_COLOR);
+			sign.setText("" + controller.getCommunicator().getOtherPlayerSign());
+			
+			//try to finish game
+			controller.getCommunicator().tryEndgame();
 		}
 		catch(IOException e) { e.printStackTrace(); }
 	}

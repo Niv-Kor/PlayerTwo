@@ -5,19 +5,22 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.IOException;
 import java.util.concurrent.Callable;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import com.hit.UI.VSPanel;
 import com.hit.UI.states.State;
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Game.GameMode;
 import com.hit.game_launch.Launcher;
-import com.hit.networking.HiddenProcess;
-import com.hit.networking.VisibleProcess;
+import com.hit.networking.ServerCommunicator;
 import com.hit.players.AITurn;
 import com.hit.players.Participant;
+
 import game_algo.GameBoard.GameMove;
 import javaNK.util.graphics.InteractiveIcon;
 import javaNK.util.math.Percentage;
@@ -28,11 +31,10 @@ public abstract class Controller extends State
 	protected InteractiveIcon dice;
 	protected VSPanel vsPanel;
 	protected GridBagConstraints constraints;
-	protected HiddenProcess hiddenProcess;
-	protected VisibleProcess visibleProcess;
+	protected ServerCommunicator serverCommunicator;
 	protected BoardCell[][] cells;
 	
-	public Controller(Window window) {
+	public Controller(Window window) throws IOException {
 		super(window, 3);
 		this.constraints = new GridBagConstraints();
 		
@@ -66,7 +68,7 @@ public abstract class Controller extends State
 		dice.setFunction(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				visibleProcess.randomMove();
+				serverCommunicator.randomMove();
 				return null;
 			}
 		});
@@ -86,21 +88,14 @@ public abstract class Controller extends State
 		constraints.insets.left = 5;
 		panes[2].add(randomBtn, constraints);
 		
-		//init all cells of the correct game
+		//initiate all cells of the correct game
 		initCells();
 		
 		/*
-		 * Init the hidden process listener thread,
-		 * to be notified about the flow of other processes in the game.
+		 * Initiate the server communicator thread,
+		 * to send and receive information from the server during the game's session.
 		 */
-		this.hiddenProcess = new HiddenProcess(this);
-		new Thread(hiddenProcess).start();
-		
-		/*
-		 * Init the visible process listener thread,
-		 * to send and receive information from the server during the player's turn.
-		 */
-		this.visibleProcess = new VisibleProcess(this);
+		this.serverCommunicator = new ServerCommunicator(this);
 		
 		//trigger the computer's first move manually if needed
 		if (mode == GameMode.SINGLE_PLAYER) triggerCompMove();
@@ -111,11 +106,22 @@ public abstract class Controller extends State
 	 * If it isn't the computer's turn, do nothing.
 	 */
 	protected void triggerCompMove() {
+		triggerCompMove(-1);
+	}
+	
+	/**
+	 * @see triggerCompMove()
+	 * @param sec - Seconds until the computer makes the move
+	 */
+	protected void triggerCompMove(double sec) {
 		//if the first turn goes to a computer participant, trigger his move here
 		if (turnManager.is(Participant.COMPUTER)) {
 			enableRandomButton(false);
 			AITurn compTurn = new AITurn(turnManager, this);
-			compTurn.thinkAndExecute();
+			
+			if (sec != -1) compTurn.thinkAndExecute(sec);
+			else compTurn.thinkAndExecute();
+			
 			enableRandomButton(true);
 		}
 	}
@@ -157,7 +163,7 @@ public abstract class Controller extends State
 				cell.erase();
 		
 		turnManager.set();
-		if (getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER) triggerCompMove();
+		if (getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER) triggerCompMove(3);
 	}
 	
 	@Override
@@ -208,7 +214,7 @@ public abstract class Controller extends State
 	 */
 	protected abstract Class<? extends BoardCell> getCellChildClass();
 	
-	public VisibleProcess getVisibleProcess() { return visibleProcess; }
+	public ServerCommunicator getCommunicator() { return serverCommunicator; }
 	
 	private void initCells() {
 		Class<? extends BoardCell> cellClass = getCellChildClass();
