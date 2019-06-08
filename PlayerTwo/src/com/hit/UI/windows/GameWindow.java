@@ -14,7 +14,6 @@ public class GameWindow extends Window
 	
 	public GameWindow(Game game) {
 		super(game.formalName(), game.getWindowDimension());
-		setSize(game.getWindowDimension());
 		addWindowListener(new WindowListener() {
 			public void windowClosing(WindowEvent arg0) { Launcher.closeGame(game); }
 			public void windowActivated(WindowEvent arg0) {}

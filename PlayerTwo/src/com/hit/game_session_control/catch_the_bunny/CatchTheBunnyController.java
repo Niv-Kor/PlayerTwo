@@ -1,60 +1,58 @@
 package com.hit.game_session_control.catch_the_bunny;
+import java.awt.event.KeyListener;
 import java.io.IOException;
-
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Game.GameMode;
-import com.hit.game_session_control.Controller;
-import com.hit.players.Participant;
 import com.hit.game_session_control.BoardCell;
-
+import com.hit.game_session_control.Controller;
+import com.hit.game_session_control.KeyboardControl;
+import com.hit.players.Participant;
 import game_algo.GameBoard.GameMove;
 import javaNK.util.math.Range;
 
 public class CatchTheBunnyController extends Controller
 {
 	private GameMove otherPlayerSpot;
+	private KeyboardControl keyboardControl;
 	
 	public CatchTheBunnyController(Window window) throws IOException {
 		super(window);
-		initPositions();
 	}
 	
-	/**
-	 * Initiate the position of the player at the start of the game randomly.
-	 * If played at a single-player mode, the same thing goes with the computer player.
-	 */
-	private void initPositions() {
+	@Override
+	protected void init() {
+		this.keyboardControl = new KeyboardControl(this, turnManager, getRelatedGame().getBoardSize());
+		window.addKeyListener(keyboardControl);
+	}
+	
+	@Override
+	protected void initPositions() {
+		window.addKeyListener(keyboardControl);
+		
 		int rows = getRelatedGame().getBoardSize().height - 1;
 		int cols = getRelatedGame().getBoardSize().width - 1;
 		
 		//find a free spot for player
 		GameMove freeSpot;
 		CatchTheBunnyCell bunnyCube;
-		Range<Integer> rowsRange = new Range<Integer>(0, getRelatedGame().getBoardSize().height - 1);
-		Range<Integer> colsRange = new Range<Integer>(0, getRelatedGame().getBoardSize().width - 1);
+		Range<Integer> rowsRange = new Range<Integer>(0, rows);
+		Range<Integer> colsRange = new Range<Integer>(0, cols);
 		freeSpot = new GameMove((int) rowsRange.generate(), (int) colsRange.generate());
 		
 		//save the cube that the player is on
 		bunnyCube = (CatchTheBunnyCell) getCell(freeSpot);
-		
-		//remove key listener from all windows, in case the game was restarted
-		for (int i = 0; i < rows; i++)
-			for (int j = 0; j < cols; j++)
-				window.removeKeyListener((CatchTheBunnyCell) getCell(new GameMove(i, j)));
-		
-		//set the window's key listener to the current active player cube
-		window.addKeyListener(bunnyCube);
 		
 		//update the player's spot in the UI as well as in the server
 		GameMove playerSpot = null;
 		try {
 			playerSpot = new GameMove(freeSpot.getRow(), freeSpot.getColumn());
 			bunnyCube.requestFocus();
-			bunnyCube.placePlayer(Participant.PLAYER_1);
-			serverCommunicator.makeMove(playerSpot);
+			bunnyCube.placePlayer(Participant.PLAYER_1, false);
+			keyboardControl.setCurrentSpot(playerSpot);
+			serverCommunicator.placePlayer(playerSpot);
 		}
-		catch(IOException e) { e.printStackTrace(); }
+		catch (IOException e) { e.printStackTrace(); }
 		
 		//also find a free spot for the computer if needed
 		if (getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER) {
@@ -70,22 +68,15 @@ public class CatchTheBunnyController extends Controller
 			//save the cube that the computer is on
 			bunnyCube = (CatchTheBunnyCell) getCell(freeSpot);
 			
-			//update the player's spot in the UI as well as in the server
+			//update the computer's spot in the UI as well as in the server
 			try {
 				GameMove compSpot = new GameMove(freeSpot.getRow(), freeSpot.getColumn());
-				bunnyCube.placePlayer(Participant.COMPUTER);
-				serverCommunicator.placeComp(compSpot);
+				bunnyCube.placePlayer(Participant.COMPUTER, false);
 				setOtherPlayerSpot(compSpot);
+				serverCommunicator.placeComp(compSpot);
 			}
-			catch(IOException e) { e.printStackTrace(); }
+			catch (IOException e) { e.printStackTrace(); }
 		}
-	}
-
-	@Override
-	public void restart() {
-		super.restart();
-		initPositions();
-		triggerCompMove();
 	}
 	
 	/**
@@ -101,6 +92,15 @@ public class CatchTheBunnyController extends Controller
 	 * @param spot - The spot of the other player
 	 */
 	public void setOtherPlayerSpot(GameMove spot) { otherPlayerSpot = spot; }
+	
+	@Override
+	public void restart() {
+		for (KeyListener listener : window.getKeyListeners())
+			window.removeKeyListener(listener);
+		
+		window.addKeyListener(keyboardControl);
+		super.restart();
+	}
 	
 	@Override
 	public Game getRelatedGame() { return Game.CATCH_THE_BUNNY; }

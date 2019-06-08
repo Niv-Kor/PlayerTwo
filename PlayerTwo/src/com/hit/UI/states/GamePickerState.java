@@ -22,9 +22,9 @@ import com.hit.game_launch.Game;
 import com.hit.game_launch.Launcher.Substate;
 
 import javaNK.util.files.FontHandler;
-import javaNK.util.files.ImageHandler;
 import javaNK.util.files.FontHandler.FontStyle;
-import javaNK.util.graphics.InteractiveIcon;
+import javaNK.util.files.ImageHandler;
+import javaNK.util.graphics.components.InteractiveIcon;
 import javaNK.util.math.Percentage;
 
 public class GamePickerState extends ConfigState

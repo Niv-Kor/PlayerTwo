@@ -1,4 +1,5 @@
 package com.hit.game_launch;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -22,8 +23,13 @@ import javaNK.util.math.Range;
  *
  */
 public enum Game {
-	TIC_TAC_TOE(Substate.TIC_TAC_TOE, new Dimension(500, 700), new Range<Double>(0.8, 2.2), new Dimension(3, 3)),
-	CATCH_THE_BUNNY(Substate.CATCH_THE_BUNNY, new Dimension(500, 700), new Range<Double>(0.03, 0.15), new Dimension(9, 9));
+	TIC_TAC_TOE(Substate.TIC_TAC_TOE, new Dimension(500, 700),
+				new Range<Double>(0.8, 2.2), new Dimension(3, 3),
+				new Color(73, 144, 137)),
+				
+	CATCH_THE_BUNNY(Substate.CATCH_THE_BUNNY, new Dimension(500, 700),
+					new Range<Double>(0.03, 0.15), new Dimension(9, 9),
+					new Color(239, 142, 127));
 	
 	public static enum GameMode {
 		SINGLE_PLAYER, MULTIPLAYER;
@@ -34,12 +40,13 @@ public enum Game {
 	private List<String> gameRules;
 	private Range<Double> responseTime;
 	private Dimension windowDim, boardSize;
+	private Color color;
 	private boolean running;
 	private int participantsAmount;
 	private GameMode gameMode;
 	private Participant firstTurnParticipant;
 	
-	private Game(Substate substate, Dimension dim, Range<Double> responseTime, Dimension boardSize) {
+	private Game(Substate substate, Dimension dim, Range<Double> responseTime, Dimension boardSize, Color color) {
 		this.substate = substate;
 		this.formalName = generateFormalName();
 		this.windowDim = new Dimension(dim);
@@ -47,6 +54,8 @@ public enum Game {
 		this.responseTime = new Range<Double>(responseTime);
 		this.running = false;
 		this.gameRules = readRulesFromFile();
+		this.gameMode = GameMode.SINGLE_PLAYER; //temporary
+		this.color = color;
 	}
 	
 	/**
@@ -169,4 +178,9 @@ public enum Game {
 	 * @return the amount of players needed to start a game.
 	 */
 	public int getParticipantsAmount() { return participantsAmount; }
+	
+	/**
+	 * @return the theme color of the game.
+	 */
+	public Color getColorTheme() { return color; }
 }

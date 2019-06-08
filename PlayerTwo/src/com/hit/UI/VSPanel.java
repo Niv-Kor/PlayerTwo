@@ -5,8 +5,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -16,11 +14,13 @@ import com.hit.players.Participant;
 
 import javaNK.util.files.ImageHandler;
 import javaNK.util.math.Percentage;
+import javaNK.util.threads.DiligentThread;
 
 public class VSPanel extends JPanel
 {
 	/**
 	 * Used as a holder for each player's fields.
+	 * 
 	 * @author Niv Kor
 	 */
 	private static class PlayerProperty
@@ -38,6 +38,7 @@ public class VSPanel extends JPanel
 		
 		/**
 		 * Turn all the player's components (turn arrow and dots) on or off.
+		 * 
 		 * @param flag - True to activate or false to deactivate
 		 */
 		public void activate(boolean flag) {
@@ -47,74 +48,82 @@ public class VSPanel extends JPanel
 		}
 		
 		/**
-		 * @return this property's player
+		 * @return this property's player.
 		 */
 		public Participant getPlayer() { return player; }
 		
 		/**
-		 * @return true if the player's components are active or flase otherwise
+		 * @return true if the player's components are active or false otherwise.
 		 */
 		public boolean isActive() { return active; }
+		
+		public void close() {
+			activate(false);
+			thinkingDots.close();
+		}
 	}
 	
 	/**
-	 * The dots that apear above the avatar whenever it's that player's turn.
+	 * The dots that appear above the avatar whenever it's that player's turn.
 	 * Used to stimulate a thinking progress.
+	 * 
 	 * @author Niv Kor
 	 */
 	private static class ThinkingDots extends JLabel
 	{
+		private static class DotAnimation extends DiligentThread
+		{
+			private static final double REPEAT_PULSE = 0.5;
+			
+			private ThinkingDots thinkingDots;
+			private int currentDot;
+			
+			public DotAnimation(ThinkingDots thinkingDots) {
+				super(REPEAT_PULSE);
+				this.thinkingDots = thinkingDots;
+				this.currentDot = 0;
+			}
+
+			@Override
+			protected void diligentFunction() throws Exception {
+				if (++currentDot >= DOTS_AMOUNT + 1) currentDot = 1;
+				thinkingDots.setIcon(thinkingDots.dots[currentDot]);
+			}
+		}
+		
 		private static final long serialVersionUID = -1092244521217893757L;
 		private static final String FILE_NAME = "miscellaneous/thinking_dot_";
 		private static final int DOTS_AMOUNT = 3;
-		private static final double SECONDS_REPEAT = 0.5;
 		
-		private Timer timer;
-		private TimerTask task;
 		private ImageIcon[] dots;
-		private int currentDot;
-		private volatile boolean cancelTask;
+		private DotAnimation animation;
 		
 		public ThinkingDots() {
 			this.dots = new ImageIcon[DOTS_AMOUNT + 1];
 			for (int i = 0; i < DOTS_AMOUNT + 1; i++)
 				dots[i] = ImageHandler.loadIcon(FILE_NAME + i + ".png");
 			
-			this.currentDot = 0;
+			this.animation = new DotAnimation(this);
+			animation.start();
 		}
 		
 		/**
-		 * Turn the dots on (they start to animate) or off (disapear).
+		 * Turn the dots on (they start to animate) or off (disappear).
+		 * 
 		 * @param flag - True to activate or false to deactivate
 		 */
 		public void activate(boolean flag) {
-			if (flag) {
-				cancelTask = false;
-				currentDot = 1;
-				timer = new Timer();
-				task = new TimerTask() {
-					@Override
-					public void run() {
-						if (!cancelTask) {
-							if (++currentDot >= DOTS_AMOUNT + 1) currentDot = 1;
-							setIcon(dots[currentDot]);
-						}
-					}
-				};
-				timer.schedule(task, 0, (long) (SECONDS_REPEAT * 1000));
-			}
-			else {
-				cancelTask = true;
-				if (timer != null) timer.cancel();
-				if (task != null) task.cancel();
-				setIcon(dots[0]);
-			}
+			animation.pause(!flag);
+			if (!flag) setIcon(dots[0]);
 		}
+		
+		public void close() { animation.kill(); }
 	}
 	
 	/**
 	 * The arrow next to the "VS" picture.
 	 * Used to point at the player that has the current turn.
+	 * 
 	 * @author Niv Kor
 	 */
 	private static class TurnArrow extends JLabel
@@ -132,6 +141,7 @@ public class VSPanel extends JPanel
 		
 		/**
 		 * Turn the arrow on (changes icon/color) or off (default icon).
+		 * 
 		 * @param flag - True to activate or false to deactivate
 		 */
 		public void activate(boolean flag) {
@@ -154,7 +164,7 @@ public class VSPanel extends JPanel
 		
 		this.stopped = false;
 		
-		//init panes
+		//initiate panes
 		Dimension playerPaneDim = Percentage.createDimension(getPreferredSize(), 25, 85);
 		Dimension centerPaneDim = Percentage.createDimension(getPreferredSize(), 50, 85);
 		
@@ -240,6 +250,7 @@ public class VSPanel extends JPanel
 	
 	/**
 	 * Activate all components of a player, and deactivate all other players.
+	 * 
 	 * @param player - The player that gets the next turn
 	 */
 	public void setPlayerTurn(Participant player) {
@@ -250,7 +261,8 @@ public class VSPanel extends JPanel
 	/**
 	 * Turn off all players or turn them on again.
 	 * When turning back on after a suspension,
-	 * the player that was suppose to be next in line gets his turn.  
+	 * the player that was suppose to be next in line gets his turn. 
+	 *  
 	 * @param flag - True to stop or false to continue
 	 */
 	public void stop(boolean flag) {
@@ -269,6 +281,11 @@ public class VSPanel extends JPanel
 		}
 		
 		stopped = flag;
+	}
+	
+	public void close() {
+		for (PlayerProperty property : playersProperty)
+			property.close();
 	}
 	
 	@Override

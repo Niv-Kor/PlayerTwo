@@ -2,12 +2,16 @@ package com.hit.game_session_control;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagLayout;
+import java.io.IOException;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-import game_algo.GameBoard.GameMove;
+import com.hit.game_launch.Game.GameMode;
+import com.hit.players.Participant;
+
+import javaNK.util.debugging.Logger;
 
 public abstract class BoardCell extends JPanel
 {
@@ -19,11 +23,17 @@ public abstract class BoardCell extends JPanel
 	protected static final Color PLAYER_2_COLOR = new Color(250, 37, 37);
 	
 	protected Controller controller;
-	protected int row, col;
 	protected TurnManager turnManager;
 	protected JLabel sign;
+	protected int row, col;
 	protected boolean enabled;
 	
+	/**
+	 * @param row - The row of the cell
+	 * @param col - The column of the cell
+	 * @param turnManager - The turn manager of the current game session
+	 * @param controller - The Controller object of the game
+	 */
 	public BoardCell(int row, int col, TurnManager turnManager, Controller controller) {
 		super(new GridBagLayout());
 		setBorder(new BevelBorder(BevelBorder.RAISED));
@@ -67,16 +77,50 @@ public abstract class BoardCell extends JPanel
 	
 	/**
 	 * Update a human's move, involving this cube.
-	 * @param move - The next move to do (if known beforehand)
 	 */
-	public abstract void updateHuman(GameMove move);
+	public abstract void updateHuman();
 	
 	/**
 	 * Update another player's move, from across the server, in the current cube.
-	 * @param move - The next move to do (if known beforehand)
 	 */
-	public abstract void updateOtherPlayer(GameMove move);
+	public abstract void updateOtherPlayer();
 	
+	/**
+	 * Place a player's sign on this cube.
+	 * 
+	 * @param player - The player that the sign belongs to
+	 * @param proceedTurn - True to proceed to the next turn after the placement
+	 */
+	final public void placePlayer(Participant player, boolean proceedTurn) {
+		try {
+			placement(player);
+			if (proceedTurn) proceedTurn();
+		}
+		catch (Exception e) { Logger.error(e); }
+	}
+	
+	/**
+	 * Abstract algorithm for placing a player on the board.
+	 * 
+	 * @param player - The player that the sign belongs to
+	 * @throws Exception when something goes wrong with the placement.
+	 */
+	protected abstract void placement(Participant player) throws Exception;
+	
+	/**
+	 * Proceed to the next turn.
+	 */
+	protected void proceedTurn() {
+		try {
+			turnManager.next();
+			controller.enableRandomButton(turnManager.is(Participant.PLAYER_1));
+			controller.getCommunicator().tryEndgame();
+			
+			if (controller.getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER)
+				controller.triggerCompMove();
+		}
+		catch (IOException e) { Logger.error(e); }
+	}
 	
 	/**
 	 * @return the sign label that's placed over the cube.

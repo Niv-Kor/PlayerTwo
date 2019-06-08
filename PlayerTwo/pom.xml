@@ -19,6 +19,13 @@
 	      	<version>1.0.3.0</version>
 	      	<scope>System</scope>
 		</dependency>
+		
+		<dependency>
+	      	<groupId>GameAlgorithms</groupId>
+	      	<artifactId>GameAlgorithms</artifactId>
+	      	<version>0.0.1-SNAPSHOT</version>
+	      	<scope>System</scope>
+		</dependency>
   </dependencies>
   
   <build>

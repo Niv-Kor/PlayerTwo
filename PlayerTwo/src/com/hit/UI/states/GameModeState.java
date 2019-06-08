@@ -5,11 +5,11 @@ import java.util.concurrent.Callable;
 
 import com.hit.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.UI.windows.Window;
-import com.hit.game_launch.Launcher;
 import com.hit.game_launch.Game.GameMode;
+import com.hit.game_launch.Launcher;
 import com.hit.game_launch.Launcher.Substate;
 
-import javaNK.util.graphics.InteractiveIcon;
+import javaNK.util.graphics.components.InteractiveIcon;
 
 public class GameModeState extends ConfigState
 {

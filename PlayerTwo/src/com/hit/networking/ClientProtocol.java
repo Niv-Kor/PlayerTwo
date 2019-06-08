@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.SocketException;
 
 import com.hit.game_launch.Game;
+import com.hit.game_launch.Game.GameMode;
 
 import javaNK.util.networking.JSON;
 import javaNK.util.networking.PortGenerator;
@@ -24,20 +25,26 @@ public class ClientProtocol extends Protocol
 	/**
 	 * Connect to the server that's responsible for the game.
 	 * @param game - The current game the client wants to play
+	 * @param reserved - True if the player is reserved to a pending game (that's waiting for him)
+	 * @param reservations - Array of all the reserved players this player invites to a new game
+	 * @param mode - The game mode to play
 	 * @throws IOException when the server port is unavailable.
 	 */
-	public void connectServer(Game game) throws IOException {
+	public void connectServer(Game game, boolean reserved, String[] reservations, GameMode mode) throws IOException {
 		//try connection if the socket is closed
 		try { connect(); }
 		catch(SocketException e) {}
 		
-		setTargetPort(PortGenerator.getAllocated("server_port"));
+		setRemotePort(PortGenerator.getAllocated("server_port"));
 		JSON message = new JSON("new_client");
 		message.put("game", game.name());
-		message.put("port", getPort());
-		
+		message.put("port", getLocalPort());
+		message.put("reserved", reserved);
+		message.putArray("reservations", reservations);
+		message.put("single_player", mode == GameMode.SINGLE_PLAYER);
 		JSON answer = request(message);
-		setTargetPort(answer.getInt("port"));
+		
+		setRemotePort(answer.getInt("port"));
 	}
 	
 	/**
@@ -46,24 +53,28 @@ public class ClientProtocol extends Protocol
 	 * @throws IOException when the server port is unavailable.
 	 */
 	public void disconnectServer(Game game) throws IOException {
-		setTargetPort(PortGenerator.getAllocated("server_port"));
+		setRemotePort(PortGenerator.getAllocated("server_port"));
 		JSON message = new JSON("leaving_client");
 		message.put("game", game.name());
-		message.put("port", getPort());
+		message.put("port", getLocalPort());
 		send(message);
 		
 		disconnect();
 	}
 	
-	public void renewGame(Game game) throws IOException {
-		int oldProtocol = getTargetPort();
+	public boolean renewGame(Game game) throws IOException {
+		int oldRemote = getRemotePort();
 		
-		setTargetPort(PortGenerator.getAllocated("server_port"));
+		setRemotePort(PortGenerator.getAllocated("server_port"));
 		JSON message = new JSON("happy_client");
 		message.put("game", game.name());
-		message.put("port", getPort());
+		message.put("port", getLocalPort());
 		send(message);
+		setRemotePort(oldRemote);
 		
-		setTargetPort(oldProtocol);
+		String[] keys = { "start_game" };
+		JSON answer = waitFor(keys);
+		
+		return answer != null && answer.getBoolean("available");
 	}
 }

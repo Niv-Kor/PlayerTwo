@@ -2,8 +2,10 @@ package com.hit.game_launch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
+
 import com.hit.UI.states.EndgameMessage;
 import com.hit.UI.states.GameModeState;
 import com.hit.UI.states.GamePickerState;
@@ -19,6 +21,8 @@ import com.hit.game_session_control.catch_the_bunny.CatchTheBunnyController;
 import com.hit.game_session_control.tic_tac_toe.TicTacToeController;
 import com.hit.networking.ClientProtocol;
 import com.hit.players.Participant;
+
+import javaNK.util.debugging.Logger;
 import javaNK.util.networking.JSON;
 
 public class Launcher {
@@ -53,7 +57,7 @@ public class Launcher {
 			//create instance
 			try { return stateClass.asSubclass(State.class).getConstructor(Window.class).newInstance(window); }
 			catch (Exception e) {
-				System.err.println("Cannot create an instance of class " + stateClass.getName());
+				Logger.error("Cannot create an instance of class " + stateClass.getName());
 				
 				//initialize the state in a different approach for debugging purposes
 				try { printStateStackTrace(stateClass); }
@@ -143,25 +147,17 @@ public class Launcher {
 		if (game.isRunning()) return;
 		
 		try {
-			//connect to the server
-			Participant.PLAYER_1.getStatus().getProtocol().connectServer(game);
-			
-			//if client wants to play as single player mode, connect his computer
-			if (mode == GameMode.SINGLE_PLAYER)
-				Participant.COMPUTER.getStatus().getProtocol().connectServer(game);
+			ClientProtocol playerProtocol = Participant.PLAYER_1.getStatus().getProtocol();
+			playerProtocol.connectServer(game, false, null, mode);
 			
 			//otherwise, wait for another player to connect to the server
-			//wait for a signal from server that the game can be started
-			ClientProtocol player1Prot = Participant.PLAYER_1.getStatus().getProtocol();
-			
-			String[] requests = {"start_game"};
-			JSON receivedMsg = player1Prot.waitFor(requests);
-			System.out.println("in launcher its " + receivedMsg);
+			//wait for a signal from the server that the game can be started
+			String[] requests = { "start_game" };
+			JSON receivedMsg = playerProtocol.waitFor(requests);
 			
 			//continue only if the correct game is starting
 			if (receivedMsg.getString("game").equals(game.name())) {
-				boolean firstTurn = receivedMsg.getBoolean("turn");
-				if (firstTurn) game.setFirstTurnParticipant(Participant.PLAYER_1);
+				if (receivedMsg.getBoolean("turn")) game.setFirstTurnParticipant(Participant.PLAYER_1);
 				else {
 					switch(mode) {
 						case SINGLE_PLAYER: game.setFirstTurnParticipant(Participant.COMPUTER); break;
@@ -214,7 +210,6 @@ public class Launcher {
 	 */
 	public static Controller getRunningGameController(Game game) {
 		WindowCache cache = getWindowCache(game);
-		
 		if (cache != null) return (Controller) cache.currentState;
 		else return null;
 	}
@@ -225,22 +220,23 @@ public class Launcher {
 	 * @param game - The game to close
 	 */
 	public static void closeGame(Game game) {
+		//disconnect player from the game's server
+		try { Participant.PLAYER_1.getStatus().getProtocol().disconnectServer(game); }
+		catch(IOException e) {
+			Logger.error("The " + game.formalName() + " game could not be closed successfully.");
+			e.printStackTrace();
+			return;
+		}
+		
+		//kill open threads in controller
+		Controller runningController = getRunningGameController(game);
+		runningController.close();
+		
+		//dispose game window and formally close the game
 		WindowCache cache = getWindowCache(game);
 		GameWindow gameWindow = (GameWindow) cache.getWindow();
 		gameWindow.dispose();
 		windowCacheList.remove(cache);
-		
-		//disconnect
-		try {
-			//disconnect player from the game's server
-			Participant.PLAYER_1.getStatus().getProtocol().disconnectServer(game);
-			
-			//if needed, disconnect the computer player too
-			if (game.getGameMode() == GameMode.SINGLE_PLAYER) 
-				Participant.COMPUTER.getStatus().getProtocol().disconnectServer(game);
-		}
-		catch(IOException e) { e.printStackTrace(); }
-		
 		game.run(false);
 	}
 	
@@ -251,7 +247,11 @@ public class Launcher {
 			switch(game.getGameMode()) {
 				case SINGLE_PLAYER: {
 					ClientProtocol playerProt = Participant.PLAYER_1.getStatus().getProtocol();
-					playerProt.renewGame(game);
+					
+					if (!playerProt.renewGame(game)) {
+						Logger.error("A problem occured when trying to restart the game.");
+						return;
+					}
 					break;
 				}
 				case MULTIPLAYER: {
@@ -262,6 +262,8 @@ public class Launcher {
 			}
 		}
 		catch(IOException e) { e.printStackTrace(); }
+		
+		getRunningGameController(game).restart();
 	}
 	
 	/**

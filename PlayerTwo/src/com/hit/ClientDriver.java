@@ -1,16 +1,14 @@
 package com.hit;
 import java.io.IOException;
-
 import com.hit.UI.windows.ConfigWindow;
 import com.hit.game_launch.Launcher;
 import com.hit.game_launch.Launcher.Substate;
-
 import javaNK.util.networking.PortGenerator;
 
 public class ClientDriver
 {
 	public static void main(String[] args) {
-		PortGenerator.allocate("server_port", 5080);
+		PortGenerator.allocate("server_port", 5081);
 		
 		try {
 			Launcher.init();

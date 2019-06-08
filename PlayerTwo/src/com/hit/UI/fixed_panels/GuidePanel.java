@@ -15,7 +15,7 @@ import com.hit.game_launch.Launcher.Substate;
 
 import javaNK.util.files.FontHandler;
 import javaNK.util.files.FontHandler.FontStyle;
-import javaNK.util.graphics.InteractiveLabel;
+import javaNK.util.graphics.components.InteractiveLabel;
 import javaNK.util.math.Percentage;
 
 public class GuidePanel extends FixedPanel

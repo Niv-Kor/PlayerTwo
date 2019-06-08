@@ -13,13 +13,14 @@ public class TicTacToeController extends Controller
 	}
 	
 	@Override
-	public void restart() {
-		super.restart();
-	}
-	
-	@Override
 	public Game getRelatedGame() { return Game.TIC_TAC_TOE; }
 
 	@Override
 	protected Class<? extends BoardCell> getCellChildClass() { return TicTacToeCell.class; }
+
+	@Override
+	protected void init() {}
+	
+	@Override
+	protected void initPositions() {}
 }

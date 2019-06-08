@@ -16,13 +16,12 @@ import com.hit.UI.states.State;
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Game.GameMode;
-import com.hit.game_launch.Launcher;
 import com.hit.networking.ServerCommunicator;
 import com.hit.players.AITurn;
 import com.hit.players.Participant;
 
 import game_algo.GameBoard.GameMove;
-import javaNK.util.graphics.InteractiveIcon;
+import javaNK.util.graphics.components.InteractiveIcon;
 import javaNK.util.math.Percentage;
 
 public abstract class Controller extends State
@@ -30,20 +29,33 @@ public abstract class Controller extends State
 	protected TurnManager turnManager;
 	protected InteractiveIcon dice;
 	protected VSPanel vsPanel;
+	protected AITurn aiTurn;
 	protected GridBagConstraints constraints;
 	protected ServerCommunicator serverCommunicator;
 	protected BoardCell[][] cells;
 	
+	/**
+	 * @see State(Window)
+	 * @throws IOException when one or more of the operating protocols fail to connect.
+	 */
 	public Controller(Window window) throws IOException {
 		super(window, 3);
 		this.constraints = new GridBagConstraints();
 		
 		//players panel (panes[0])
-		createPanel(new BorderLayout(), Percentage.createDimension(window.getDimension(), 100, 18), new Color(55, 55, 55));
+		createPanel(new BorderLayout(),
+				    Percentage.createDimension(window.getDimension(), 100, 18),
+				    new Color(55, 55, 55));
+		
 		//game panel (panes[1])
-		createPanel(new GridBagLayout(), Percentage.createDimension(window.getDimension(), 100, 75), new Color(73, 144, 137));
+		createPanel(new GridBagLayout(),
+					Percentage.createDimension(window.getDimension(), 100, 75),
+					getRelatedGame().getColorTheme());
+		
 		//random selection panel (panes[2])
-		createPanel(new GridBagLayout(), Percentage.createDimension(window.getDimension(), 100, 7), new Color(73, 144, 137));
+		createPanel(new GridBagLayout(),
+					Percentage.createDimension(window.getDimension(), 100, 7),
+					getRelatedGame().getColorTheme());
 		
 		//decide which participants play the game
 		GameMode mode = getRelatedGame().getGameMode();
@@ -68,7 +80,8 @@ public abstract class Controller extends State
 		dice.setFunction(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				serverCommunicator.randomMove();
+				getCell(serverCommunicator.randomMove()).placePlayer(Participant.PLAYER_1, true);
+				System.out.println("happened");
 				return null;
 			}
 		});
@@ -97,6 +110,10 @@ public abstract class Controller extends State
 		 */
 		this.serverCommunicator = new ServerCommunicator(this);
 		
+		//initiate crucial parts before the beginning of a game
+		init();
+		initPositions();
+		
 		//trigger the computer's first move manually if needed
 		if (mode == GameMode.SINGLE_PLAYER) triggerCompMove();
 	}
@@ -105,7 +122,7 @@ public abstract class Controller extends State
 	 * Manually trigger the computer's move.
 	 * If it isn't the computer's turn, do nothing.
 	 */
-	protected void triggerCompMove() {
+	public void triggerCompMove() {
 		triggerCompMove(-1);
 	}
 	
@@ -113,14 +130,14 @@ public abstract class Controller extends State
 	 * @see triggerCompMove()
 	 * @param sec - Seconds until the computer makes the move
 	 */
-	protected void triggerCompMove(double sec) {
+	public void triggerCompMove(double sec) {
 		//if the first turn goes to a computer participant, trigger his move here
 		if (turnManager.is(Participant.COMPUTER)) {
 			enableRandomButton(false);
-			AITurn compTurn = new AITurn(turnManager, this);
+			aiTurn = new AITurn(turnManager, this);
 			
-			if (sec != -1) compTurn.thinkAndExecute(sec);
-			else compTurn.thinkAndExecute();
+			if (sec != -1) aiTurn.thinkAndExecute(sec);
+			else aiTurn.thinkAndExecute();
 			
 			enableRandomButton(true);
 		}
@@ -144,9 +161,9 @@ public abstract class Controller extends State
 		BoardCell cell = cells[move.getRow()][move.getColumn()];
 		
 		switch(player) {
-			case PLAYER_1: cell.updateHuman(move); break;
+			case PLAYER_1: cell.updateHuman(); break;
 			case PLAYER_2:
-			case COMPUTER: cell.updateOtherPlayer(move); break;
+			case COMPUTER: cell.updateOtherPlayer(); break;
 		}
 	}
 	
@@ -154,7 +171,6 @@ public abstract class Controller extends State
 	 * Restart the game.
 	 */
 	public void restart() {
-		Launcher.restartGame(getRelatedGame());
 		stop(false);
 		
 		//erase all cells
@@ -162,8 +178,19 @@ public abstract class Controller extends State
 			for (BoardCell cell : cellRow)
 				cell.erase();
 		
+		initPositions();
 		turnManager.set();
-		if (getRelatedGame().getGameMode() == GameMode.SINGLE_PLAYER) triggerCompMove(3);
+		triggerCompMove(3);
+	}
+	
+	/**
+	 * Close the controller permanently.
+	 */
+	public void close() {
+		stop(true);
+		serverCommunicator.kill();
+		if (aiTurn != null) aiTurn.cancel();
+		vsPanel.close();
 	}
 	
 	@Override
@@ -181,15 +208,14 @@ public abstract class Controller extends State
 	public void stop(boolean flag) {
 		turnManager.stop(flag);
 		vsPanel.stop(flag);
+		if (aiTurn != null) aiTurn.cancel();
 		
 		//enable or disable all cells
 		for (BoardCell[] cellRow : cells)
 			for (BoardCell cell : cellRow)
 				cell.enable(!flag);
 		
-		//enable or disable random button
-		dice.enableFunction(!flag);
-		dice.enableHover(!flag);
+		enableRandomButton(!flag);
 	}
 	
 	/**
@@ -210,11 +236,25 @@ public abstract class Controller extends State
 	public abstract Game getRelatedGame();
 	
 	/**
-	 * @return the compatible game's child class that extands cell
+	 * @return the compatible game's child class that extends BoardCell.
 	 */
 	protected abstract Class<? extends BoardCell> getCellChildClass();
 	
+	/**
+	 * @return the thread that communicates with the server.
+	 */
 	public ServerCommunicator getCommunicator() { return serverCommunicator; }
+	
+	/**
+	 * Initiate class members.
+	 */
+	protected abstract void init();
+	
+	/**
+	 * Initiate the position of the player at the start of the game randomly.
+	 * If played at a single-player mode, the same thing goes with the computer player.
+	 */
+	protected abstract void initPositions();
 	
 	private void initCells() {
 		Class<? extends BoardCell> cellClass = getCellChildClass();
@@ -226,13 +266,13 @@ public abstract class Controller extends State
 		Dimension overallDim = Percentage.createDimension(panes[1].getPreferredSize(), 80, 80);
 		Dimension cellDim = new Dimension(overallDim.width / rows, overallDim.height / cols);
 		
-		//init cells array
+		//initiate cells array
 		this.cells = new BoardCell[rows][cols];
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.insets = new Insets(1, 1, 1, 1);
 		
-		//init every cell and place it
+		//initiate every cell and place it
 		for (int i = 0; i < rows; i++, constraints.gridy++, constraints.gridx = 0) {
 			for (int j = 0; j < cols; j++, constraints.gridx++) {
 				//create the cell using reflection

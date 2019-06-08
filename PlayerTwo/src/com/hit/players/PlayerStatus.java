@@ -29,7 +29,7 @@ public class PlayerStatus
 	private static final Range<Integer> UNDERSCORE = new Range<Integer>(95, 95);
 	private static final String[] RANDOM_NAMES = {"Lorene", "Dale", "Noah",
 												  "Ruben", "Maria", "Jasper",
-												  "Tania", "Lindsay", "Napoleon",
+												  "Tania", "Lindsey", "Napoleon",
 												  "Jacqualine", "Rolland", "Patrica",
 												  "Keen", "Grace", "Tommy",
 												  "Curtis", "Queency", "Frankie",
