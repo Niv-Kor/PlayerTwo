@@ -43,7 +43,7 @@ public class PlayerStatus
 	
 	public PlayerStatus(boolean human) throws IOException {
 		this.isHuman = human;
-		this.clientSideProtocol = new ClientProtocol();
+		this.clientSideProtocol = new ClientProtocol(this);
 		
 		if (!human) {
 			this.avatar = new Avatar(AvatarType.COMPUTER);
@@ -89,7 +89,7 @@ public class PlayerStatus
 	 * Generate a name that goes by the template of: "Guest_XXXXXXXX".
 	 */
 	public void generateName() {
-		//init list of lagal characters
+		//initiate list of legal characters
 		if (legalCharacters == null) {
 			legalCharacters = new ArrayList<Range<Integer>>();
 			legalCharacters.add(NUMBERS);

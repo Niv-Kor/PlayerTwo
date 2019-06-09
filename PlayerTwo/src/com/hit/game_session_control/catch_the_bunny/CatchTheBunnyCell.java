@@ -49,7 +49,7 @@ public class CatchTheBunnyCell extends BoardCell
 	@Override
 	public void placement(Participant player) throws Exception {
 		Dimension iconDim = Percentage.createDimension(getPreferredSize(), 80, 80);
-		Icon playerIcon = player.getStatus().getAvatar().getIcon(iconDim);
+		Icon playerIcon = player.getStatus().getAvatar().resizeIcon(iconDim);
 		sign.setIcon(playerIcon);
 		
 		if (player == Participant.PLAYER_1) setBackground(PLAYER_1_COLOR.brighter());

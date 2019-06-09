@@ -46,6 +46,13 @@ public enum Game {
 	private GameMode gameMode;
 	private Participant firstTurnParticipant;
 	
+	/**
+	 * @param substate - The controller state of the game
+	 * @param dim - Dimension of the game window
+	 * @param responseTime - Time range in seconds within which the computer has to make a move
+	 * @param boardSize - Size of the game board (rows X columns)
+	 * @param color - Color theme of the game
+	 */
 	private Game(Substate substate, Dimension dim, Range<Double> responseTime, Dimension boardSize, Color color) {
 		this.substate = substate;
 		this.formalName = generateFormalName();

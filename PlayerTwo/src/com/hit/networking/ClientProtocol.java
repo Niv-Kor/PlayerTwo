@@ -4,6 +4,7 @@ import java.net.SocketException;
 
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Game.GameMode;
+import com.hit.players.PlayerStatus;
 
 import javaNK.util.networking.JSON;
 import javaNK.util.networking.PortGenerator;
@@ -11,15 +12,25 @@ import javaNK.util.networking.Protocol;
 
 public class ClientProtocol extends Protocol
 {
-	public ClientProtocol() throws IOException {}
+	private PlayerStatus status;
 	
 	/**
+	 * @param status - The status of the participant that uses this protocol
+	 * @throws IOException when the socket cannot connect to the host.
+	 */
+	public ClientProtocol(PlayerStatus status) throws IOException {
+		this.status = status;
+	}
+	
+	/**
+	 * @param status - The status of the participant that uses this protocol
 	 * @param port - The port this protocol will use
 	 * @param targetPort - The port this protocol will communicate with
 	 * @throws IOException when the socket cannot connect to the host.
 	 */
-	public ClientProtocol(Integer port, Integer targetPort) throws IOException {
+	public ClientProtocol(PlayerStatus status, Integer port, Integer targetPort) throws IOException {
 		super(port, targetPort);
+		this.status = status;
 	}
 	
 	/**
@@ -28,9 +39,10 @@ public class ClientProtocol extends Protocol
 	 * @param reserved - True if the player is reserved to a pending game (that's waiting for him)
 	 * @param reservations - Array of all the reserved players this player invites to a new game
 	 * @param mode - The game mode to play
+	 * @return true if the connection to the server is successful.
 	 * @throws IOException when the server port is unavailable.
 	 */
-	public void connectServer(Game game, boolean reserved, String[] reservations, GameMode mode) throws IOException {
+	public boolean connectServer(Game game, boolean reserved, String[] reservations, GameMode mode) throws IOException {
 		//try connection if the socket is closed
 		try { connect(); }
 		catch(SocketException e) {}
@@ -39,12 +51,18 @@ public class ClientProtocol extends Protocol
 		JSON message = new JSON("new_client");
 		message.put("game", game.name());
 		message.put("port", getLocalPort());
+		message.put("name", status.getNickname());
+		message.put("avatar", status.getAvatar().getID());
 		message.put("reserved", reserved);
 		message.putArray("reservations", reservations);
 		message.put("single_player", mode == GameMode.SINGLE_PLAYER);
 		JSON answer = request(message);
 		
-		setRemotePort(answer.getInt("port"));
+		if (answer.getBoolean("available")) {
+			setRemotePort(answer.getInt("port"));
+			return true;
+		}
+		else return false;
 	}
 	
 	/**

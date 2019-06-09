@@ -52,11 +52,8 @@ public class KeyboardControl implements KeyListener
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
-		System.out.println("in here");
 		if (criticalSection || !turnManager.is(Participant.PLAYER_1)) return;
 		else criticalSection = true;
-		
-		System.out.println("successfully entered");
 		
 		Keys pressedKey = Keys.getKey(e.getKeyCode());
 		if (pressedKey == null) return;

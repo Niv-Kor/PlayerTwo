@@ -5,12 +5,10 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
-
 import javaNK.util.files.ImageHandler;
 import javaNK.util.math.RNG;
 import javaNK.util.math.Range;
@@ -33,8 +31,8 @@ public class Avatar extends JLabel
 	private static final Border UNSELECTED_BORDER = new MatteBorder(2, 2, 2, 2, DEFAULT_UNSELECTED_COLOR);
 	
 	private static Avatar[] humanAvatars, compAvatars;
-	
 	private Color unselectColor, selectColor;
+	private String id;
 	
 	public Avatar(AvatarType type) {
 		super(((Avatar) RNG.select(get(type))).getIcon());
@@ -45,8 +43,12 @@ public class Avatar extends JLabel
 		this((ImageIcon) other.getIcon());
 	}
 	
+	public Avatar(String name) {
+		this(ImageHandler.loadIcon(PATH + name + FILE_TYPE));
+	}
+	
 	private Avatar(ImageIcon icon) {
-		super(ImageHandler.cloneIcon(icon));
+		super(icon);
 		initVars();
 	}
 	
@@ -54,8 +56,9 @@ public class Avatar extends JLabel
 		setBorder(UNSELECTED_BORDER);
 		this.selectColor = DEFAULT_SELECTED_COLOR;
 		this.unselectColor = DEFAULT_UNSELECTED_COLOR;
+		this.id = extractID(ImageHandler.getPath(getIcon()));
 	}
-	
+
 	/**
 	 * Transform the avatar's border to selected or unselected mode
 	 * @param flag - true to select or false to deselect
@@ -159,14 +162,14 @@ public class Avatar extends JLabel
 		
 		for (int i = 0; i < amount; i++) {
 			//load icon
-			humanAvatars[i] = new Avatar(ImageHandler.loadIcon(PATH + (i + 1) + FILE_TYPE));
+			humanAvatars[i] = new Avatar("" + (i + 1));
 			
-			//check if a comp icon exists and create it if it's not
+			//check if a computer icon exists and create it if it's not
 			if (!ImageHandler.test(PATH + (amount + 1) + "C" + FILE_TYPE))
 				attachCompSign((ImageIcon) humanAvatars[i].getIcon(), "" + (i + 1));
 			
-			//than load comp icon
-			compAvatars[i] = new Avatar(ImageHandler.loadIcon(PATH + (i + 1) + "C" + FILE_TYPE));
+			//than load computer icon
+			compAvatars[i] = new Avatar((i + 1) + "C");
 		}
 	}
 	
@@ -191,12 +194,12 @@ public class Avatar extends JLabel
 		
 		for (int y = 0; y < sourceImage.getHeight(); y++) {
 			for (int x = 0; x < sourceImage.getWidth(); x++) {
-				//(x, y) is inside the area of the comp in the image
+				//(x, y) is inside the area of the computer in the image
 				if (compArea.intersects(x) && compArea.intersects(y)) {
 					int offset = BIT_SIZE - COMP_BIT_SIZE;
 					tempColor = new Color(compImage.getRGB(x - offset, y - offset), true);
 					
-					//copy RGB/A values from comp image
+					//copy RGB/A values from computer image
 					alpha = tempColor.getAlpha();
 					red = tempColor.getRed();
 					green = tempColor.getGreen();
@@ -221,9 +224,16 @@ public class Avatar extends JLabel
 		ImageHandler.create(destImage, PATH + name + "C" + FILE_TYPE);
 	}
 	
-	public ImageIcon getIcon(Dimension dim) {
+	public ImageIcon resizeIcon(Dimension dim) {
 		Image bufferedImage = ((ImageIcon) getIcon()).getImage();
 		Image clone = bufferedImage.getScaledInstance(dim.width, dim.height, Image.SCALE_DEFAULT);
 		return new ImageIcon(clone);
 	}
+	
+	private String extractID(String path) {
+		String fileName = path.substring(path.lastIndexOf("/") + 1);
+		return fileName.substring(0, fileName.indexOf("."));
+	}
+	
+	public String getID() { return id; }
 }

@@ -81,7 +81,6 @@ public abstract class Controller extends State
 			@Override
 			public Void call() throws Exception {
 				getCell(serverCommunicator.randomMove()).placePlayer(Participant.PLAYER_1, true);
-				System.out.println("happened");
 				return null;
 			}
 		});
@@ -133,18 +132,16 @@ public abstract class Controller extends State
 	public void triggerCompMove(double sec) {
 		//if the first turn goes to a computer participant, trigger his move here
 		if (turnManager.is(Participant.COMPUTER)) {
-			enableRandomButton(false);
 			aiTurn = new AITurn(turnManager, this);
 			
 			if (sec != -1) aiTurn.thinkAndExecute(sec);
 			else aiTurn.thinkAndExecute();
-			
-			enableRandomButton(true);
 		}
 	}
 	
 	/**
 	 * Enable or disable the random move button.
+	 * 
 	 * @param flag - True to enable or false to disable
 	 */
 	public void enableRandomButton(boolean flag) {
@@ -154,6 +151,7 @@ public abstract class Controller extends State
 	
 	/**
 	 * Update every component that needs to be changed for the random move.
+	 * 
 	 * @param move - The random move that should take place
 	 * @param player - Which player made that move
 	 */
@@ -203,6 +201,7 @@ public abstract class Controller extends State
 	/**
 	 * Stop the game entirely or continue its state.
 	 * A paused game does not react to any mouse event.
+	 * 
 	 * @param flag - True to stop the game or false to continue
 	 */
 	public void stop(boolean flag) {

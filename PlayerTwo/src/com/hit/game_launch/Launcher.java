@@ -20,7 +20,9 @@ import com.hit.game_session_control.Controller;
 import com.hit.game_session_control.catch_the_bunny.CatchTheBunnyController;
 import com.hit.game_session_control.tic_tac_toe.TicTacToeController;
 import com.hit.networking.ClientProtocol;
+import com.hit.players.Avatar;
 import com.hit.players.Participant;
+import com.hit.players.PlayerStatus;
 
 import javaNK.util.debugging.Logger;
 import javaNK.util.networking.JSON;
@@ -148,7 +150,7 @@ public class Launcher {
 		
 		try {
 			ClientProtocol playerProtocol = Participant.PLAYER_1.getStatus().getProtocol();
-			playerProtocol.connectServer(game, false, null, mode);
+			if (!playerProtocol.connectServer(game, false, null, mode)) return;
 			
 			//otherwise, wait for another player to connect to the server
 			//wait for a signal from the server that the game can be started
@@ -157,6 +159,18 @@ public class Launcher {
 			
 			//continue only if the correct game is starting
 			if (receivedMsg.getString("game").equals(game.name())) {
+				
+				//retrieve information about the other player
+				if (mode == GameMode.MULTIPLAYER) {
+					JSON otherPlayerInfo = receivedMsg.getJSON("other_player");
+					String name = otherPlayerInfo.getString("name");
+					String avatarID = otherPlayerInfo.getString("avatar");
+					PlayerStatus otherPlayerStatus = Participant.PLAYER_2.getStatus();
+					
+					otherPlayerStatus.setNickname(name);
+					otherPlayerStatus.setAvatar(new Avatar(avatarID));
+				}
+				
 				if (receivedMsg.getBoolean("turn")) game.setFirstTurnParticipant(Participant.PLAYER_1);
 				else {
 					switch(mode) {

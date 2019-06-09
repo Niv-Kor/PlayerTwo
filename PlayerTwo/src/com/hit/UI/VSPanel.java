@@ -194,13 +194,13 @@ public class VSPanel extends JPanel
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.insets.top = 10;
-		constraints.insets.left = -338;
+		constraints.insets.left = -353;
 		northPane.add(thinkingDots[0], constraints);
 		
 		thinkingDots[1] = new ThinkingDots();
 		constraints.gridx = 1;
 		constraints.insets.left = 0;
-		constraints.insets.right = -338;
+		constraints.insets.right = -353;
 		northPane.add(thinkingDots[1], constraints);
 		
 		//lower panel setting
