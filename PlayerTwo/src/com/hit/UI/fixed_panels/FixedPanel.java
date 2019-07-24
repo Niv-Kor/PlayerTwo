@@ -2,12 +2,9 @@ package com.hit.UI.fixed_panels;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
-
 import javax.swing.JPanel;
-
 import com.hit.UI.windows.Window;
-
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public abstract class FixedPanel extends JPanel
 {
@@ -19,7 +16,7 @@ public abstract class FixedPanel extends JPanel
 	public FixedPanel(Window window, double sizePercent) {
 		super(new BorderLayout());
 		
-		setPreferredSize(Percentage.createDimension(window.getDimension(), 100, sizePercent));
+		setPreferredSize(DimensionalHandler.adjust(window.getDimension(), 100, sizePercent));
 		this.constraints = new GridBagConstraints();
 	}
 }

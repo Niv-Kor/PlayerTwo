@@ -7,7 +7,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,17 +14,15 @@ import javax.swing.JTextPane;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
 import com.hit.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Launcher.Substate;
-
+import javaNK.util.GUI.swing.components.InteractiveIcon;
 import javaNK.util.files.FontHandler;
 import javaNK.util.files.FontHandler.FontStyle;
 import javaNK.util.files.ImageHandler;
-import javaNK.util.graphics.components.InteractiveIcon;
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public class GamePickerState extends ConfigState
 {
@@ -132,7 +129,7 @@ public class GamePickerState extends ConfigState
 		header.addTitleLine("Pick a game");
 		
 		JPanel pickerPane = new JPanel(new GridBagLayout());
-		pickerPane.setPreferredSize(Percentage.createDimension(window.getDimension(), 100, 70));
+		pickerPane.setPreferredSize(DimensionalHandler.adjust(window.getDimension(), 100, 70));
 		pickerPane.setOpaque(false);
 		
 		//game picker holder
@@ -191,7 +188,7 @@ public class GamePickerState extends ConfigState
 		pickerPane.add(rightArrow, constraints);
 		
 		//game rules
-		pickerHolder.getRules().setPreferredSize(Percentage.createDimension(window.getDimension(), 60, 30));
+		pickerHolder.getRules().setPreferredSize(DimensionalHandler.adjust(window.getDimension(), 60, 30));
 		
 		constraints.gridx = 1;
 		constraints.gridy = 2;

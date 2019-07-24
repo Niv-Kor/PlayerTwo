@@ -1,13 +1,10 @@
 package com.hit.UI.states;
 import java.awt.BorderLayout;
-
 import javax.swing.JPanel;
-
 import com.hit.UI.fixed_panels.GuidePanel;
 import com.hit.UI.fixed_panels.HeaderPanel;
 import com.hit.UI.windows.Window;
-
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public abstract class ConfigState extends State
 {
@@ -23,7 +20,7 @@ public abstract class ConfigState extends State
 		
 		panes[1] = new JPanel(new BorderLayout());
 		int panelHeight = (int) (100 - HeaderPanel.HEIGHT_PERCENT - GuidePanel.HEIGHT_PERCENT); 
-		panes[1].setPreferredSize(Percentage.createDimension(window.getDimension(), 100, panelHeight));
+		panes[1].setPreferredSize(DimensionalHandler.adjust(window.getDimension(), 100, panelHeight));
 		panes[1].setOpaque(false);
 		panel = panes[1];
 		

@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.hit.game_launch.Launcher.Substate;
 import com.hit.players.Participant;
-
 import javaNK.util.files.FileLoader;
 import javaNK.util.math.Range;
 
@@ -19,17 +17,17 @@ import javaNK.util.math.Range;
  * Enum that contains all the games.
  * Every game has its compatible state is 'Substate'.
  * Use this enum to tell Launcher which game you want it to refer to.
+ * 
  * @author Niv Kor
- *
  */
 public enum Game {
 	TIC_TAC_TOE(Substate.TIC_TAC_TOE, new Dimension(500, 700),
 				new Range<Double>(0.8, 2.2), new Dimension(3, 3),
-				new Color(73, 144, 137)),
+				new Color(73, 144, 137), new Range<Integer>(10, 10), true),
 				
 	CATCH_THE_BUNNY(Substate.CATCH_THE_BUNNY, new Dimension(500, 700),
 					new Range<Double>(0.03, 0.15), new Dimension(9, 9),
-					new Color(239, 142, 127));
+					new Color(239, 142, 127), new Range<Integer>(15, 40), false);
 	
 	public static enum GameMode {
 		SINGLE_PLAYER, MULTIPLAYER;
@@ -39,10 +37,12 @@ public enum Game {
 	private String formalName;
 	private List<String> gameRules;
 	private Range<Double> responseTime;
+	private Range<Integer> countdownTime;
 	private Dimension windowDim, boardSize;
 	private Color color;
 	private boolean running;
 	private int participantsAmount;
+	private boolean addedSigns;
 	private GameMode gameMode;
 	private Participant firstTurnParticipant;
 	
@@ -53,13 +53,17 @@ public enum Game {
 	 * @param boardSize - Size of the game board (rows X columns)
 	 * @param color - Color theme of the game
 	 */
-	private Game(Substate substate, Dimension dim, Range<Double> responseTime, Dimension boardSize, Color color) {
+	private Game(Substate substate, Dimension dim, Range<Double> responseTime,
+				 Dimension boardSize, Color color, Range<Integer> countdownTime, boolean addedSigns) {
+		
 		this.substate = substate;
 		this.formalName = generateFormalName();
 		this.windowDim = new Dimension(dim);
 		this.boardSize = new Dimension(boardSize);
-		this.responseTime = new Range<Double>(responseTime);
+		this.responseTime = responseTime;
+		this.countdownTime = countdownTime;
 		this.running = false;
+		this.addedSigns = addedSigns;
 		this.gameRules = readRulesFromFile();
 		this.gameMode = GameMode.SINGLE_PLAYER; //temporary
 		this.color = color;
@@ -67,6 +71,7 @@ public enum Game {
 	
 	/**
 	 * Read the "rules.txt" that exists for each game in resources folder.
+	 * 
 	 * @return a list of String objects that each of them represents a line in the file.
 	 */
 	private List<String> readRulesFromFile() {
@@ -98,6 +103,7 @@ public enum Game {
 	 * Create the formal name of the game.
 	 * This method is not very efficient to be used normally,
 	 * so it's only used once to initialize 'formalName' variable.
+	 * 
 	 * @return a formal name of the game. (Ex. input: 'TIC_TAC_TOE'; output: 'Tic Tac Toe').
 	 */
 	private String generateFormalName() {
@@ -118,15 +124,27 @@ public enum Game {
 	}
 	
 	/**
+	 * @return true if the game adds signs to board, or false if it moves them around. 
+	 */
+	public boolean areSignsAdded() { return addedSigns; }
+	
+	/**
 	 * Get the computer's response time range in seconds,
 	 * that generates a random number for each of its turn.
+	 * 
 	 * @return the computer's response time range in seconds.
 	 */
 	public Range<Double> getResponseTime() { return responseTime; }
 	
 	/**
+	 * @return the countdown time for every player's turn.
+	 */
+	public Range<Integer> getCountdownTime() { return countdownTime; }
+	
+	/**
 	 * Activate or deactivate a game.
 	 * Can only be accessed from within Launcher.
+	 * 
 	 * @param flag - True to activate or false to deactivate
 	 */
 	void run(boolean flag) { running = flag; }

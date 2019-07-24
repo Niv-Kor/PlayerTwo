@@ -4,19 +4,16 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.concurrent.Callable;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Launcher;
-
 import game_algo.IGameAlgo.GameState;
+import javaNK.util.GUI.swing.components.InteractiveLabel;
 import javaNK.util.files.ImageHandler;
-import javaNK.util.graphics.components.InteractiveLabel;
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public class EndgameMessage extends State
 {
@@ -77,9 +74,9 @@ public class EndgameMessage extends State
 		
 		//create panels
 		//emoji and message panel (panes[0])
-		createPanel(new GridBagLayout(), Percentage.createDimension(window.getDimension(), 100, 70), null);
+		createPanel(new GridBagLayout(), DimensionalHandler.adjust(window.getDimension(), 100, 70), null);
 		//options panel (panes[1])
-		createPanel(new GridBagLayout(), Percentage.createDimension(window.getDimension(), 100, 20), null);
+		createPanel(new GridBagLayout(), DimensionalHandler.adjust(window.getDimension(), 100, 20), null);
 	}
 	
 	public void build(Game game, GameState gameState) throws Exception {

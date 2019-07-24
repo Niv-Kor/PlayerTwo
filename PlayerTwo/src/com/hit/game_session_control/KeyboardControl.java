@@ -32,7 +32,7 @@ public class KeyboardControl implements KeyListener
 		}
 	}
 	
-	private Controller controller;
+	private GameController controller;
 	private TurnManager turnManager;
 	private Dimension boundaries;
 	private GameMove currentSpot;
@@ -43,10 +43,10 @@ public class KeyboardControl implements KeyListener
 	 * @param turnManager - The current manager of turns
 	 * @param boundaries - The size of the board
 	 */
-	public KeyboardControl(Controller controller, TurnManager turnManager, Dimension boundaries) {
+	public KeyboardControl(GameController controller) {
 		this.controller = controller;
-		this.turnManager = turnManager;
-		this.boundaries = boundaries;
+		this.turnManager = controller.getTurnManager();
+		this.boundaries = controller.getRelatedGame().getBoardSize();
 		this.currentSpot = new GameMove(0, 0);
 	}
 	

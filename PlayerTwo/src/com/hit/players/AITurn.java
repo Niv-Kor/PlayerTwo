@@ -1,26 +1,24 @@
 package com.hit.players;
 import java.io.IOException;
 import java.net.SocketException;
-
-import com.hit.game_session_control.Controller;
+import com.hit.game_session_control.GameController;
 import com.hit.game_session_control.TurnManager;
-
 import javaNK.util.math.Range;
 import javaNK.util.threads.QuickThread;
 
 public class AITurn extends QuickThread
 {
-	private Controller controller;
+	private GameController controller;
 	private TurnManager turnManager;
 	private Range<Double> responseTime;
 	
 	/**
 	 * @param turnManager - Turn manager of the game session
-	 * @param controller - Controller of the played game
+	 * @param control - Controller of the played game
 	 */
-	public AITurn(TurnManager turnManager, Controller controller) {
+	public AITurn(GameController controller) {
 		this.responseTime = controller.getRelatedGame().getResponseTime();
-		this.turnManager = turnManager;
+		this.turnManager = controller.getTurnManager();
 		this.controller = controller;
 	}
 	

@@ -5,18 +5,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagLayout;
 import java.util.concurrent.Callable;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Launcher;
 import com.hit.game_launch.Launcher.Substate;
-
+import javaNK.util.GUI.swing.components.InteractiveLabel;
 import javaNK.util.files.FontHandler;
 import javaNK.util.files.FontHandler.FontStyle;
-import javaNK.util.graphics.components.InteractiveLabel;
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public class GuidePanel extends FixedPanel
 {
@@ -26,7 +23,7 @@ public class GuidePanel extends FixedPanel
 		private static final double HEIGHT_PERCENT = 15;
 		
 		public NorthPanel(JPanel container) {
-			setPreferredSize(Percentage.createDimension(container.getPreferredSize(), 100, HEIGHT_PERCENT));
+			setPreferredSize(DimensionalHandler.adjust(container.getPreferredSize(), 100, HEIGHT_PERCENT));
 		}
 		
 		@Override
@@ -61,7 +58,7 @@ public class GuidePanel extends FixedPanel
 		add(northAssist, BorderLayout.NORTH);
 		
 		this.mainPanel = new JPanel(new GridBagLayout());
-		mainPanel.setPreferredSize(Percentage.createDimension(getPreferredSize(), 100, 100 - NorthPanel.HEIGHT_PERCENT));
+		mainPanel.setPreferredSize(DimensionalHandler.adjust(getPreferredSize(), 100, 100 - NorthPanel.HEIGHT_PERCENT));
 		mainPanel.setBackground(COLOR);
 		add(mainPanel, BorderLayout.CENTER);
 		

@@ -7,54 +7,49 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
 import java.util.concurrent.Callable;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import com.hit.UI.VSPanel;
 import com.hit.UI.states.State;
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game;
 import com.hit.game_launch.Game.GameMode;
-import com.hit.networking.ServerCommunicator;
-import com.hit.players.AITurn;
+import com.hit.game_session_control.countdown.CountdownFacility;
 import com.hit.players.Participant;
-
 import game_algo.GameBoard.GameMove;
-import javaNK.util.graphics.components.InteractiveIcon;
-import javaNK.util.math.Percentage;
+import javaNK.util.GUI.swing.components.InteractiveIcon;
+import javaNK.util.math.DimensionalHandler;
 
-public abstract class Controller extends State
+public abstract class GameView extends State
 {
-	protected TurnManager turnManager;
 	protected InteractiveIcon dice;
 	protected VSPanel vsPanel;
-	protected AITurn aiTurn;
 	protected GridBagConstraints constraints;
-	protected ServerCommunicator serverCommunicator;
+	protected GameController controller;
+	protected CountdownFacility countdown;
 	protected BoardCell[][] cells;
 	
 	/**
 	 * @see State(Window)
 	 * @throws IOException when one or more of the operating protocols fail to connect.
 	 */
-	public Controller(Window window) throws IOException {
+	public GameView(Window window) throws IOException {
 		super(window, 3);
 		this.constraints = new GridBagConstraints();
 		
 		//players panel (panes[0])
 		createPanel(new BorderLayout(),
-				    Percentage.createDimension(window.getDimension(), 100, 18),
+				    DimensionalHandler.adjust(window.getDimension(), 100, 18),
 				    new Color(55, 55, 55));
 		
 		//game panel (panes[1])
 		createPanel(new GridBagLayout(),
-					Percentage.createDimension(window.getDimension(), 100, 75),
+					DimensionalHandler.adjust(window.getDimension(), 100, 75),
 					getRelatedGame().getColorTheme());
 		
 		//random selection panel (panes[2])
 		createPanel(new GridBagLayout(),
-					Percentage.createDimension(window.getDimension(), 100, 7),
+					DimensionalHandler.adjust(window.getDimension(), 100, 7),
 					getRelatedGame().getColorTheme());
 		
 		//decide which participants play the game
@@ -69,25 +64,32 @@ public abstract class Controller extends State
 		
 		//build top player panel
 		this.vsPanel = new VSPanel(participants[0], participants[1], panes[0]);
-		this.turnManager = new TurnManager(vsPanel, participants);
-		turnManager.set(getRelatedGame().getFirstTurnParticipant());
 		panes[0].add(vsPanel, BorderLayout.CENTER);
 		
-		//build south random move panel
+		//build south panel
+		//countdown facility
+		this.countdown = createCountdownFacility();
+		countdown.setFont(LABEL_FONT.deriveFont((float) 50));
+		countdown.setForeground(Color.WHITE);
+		
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.insets = new Insets(-5, -250, 5, 5);
+		panes[2].add(countdown, constraints);
+		
 		//dice icon
 		this.dice = new InteractiveIcon("miscellaneous/dice.png");
 		dice.setHoverIcon("miscellaneous/dice_hover.png");
 		dice.setFunction(new Callable<Void>() {
 			@Override
 			public Void call() throws Exception {
-				getCell(serverCommunicator.randomMove()).placePlayer(Participant.PLAYER_1, true);
+				controller.randomPlayerMove();
 				return null;
 			}
 		});
 		
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.insets = new Insets(-5, -32, 5, 5);
+		constraints.gridx = 1;
+		constraints.insets = new Insets(-5, 5, 5, 5);
 		panes[2].add(dice, constraints);
 		
 		//'random' label next to dice
@@ -95,48 +97,23 @@ public abstract class Controller extends State
 		randomBtn.setForeground(Color.WHITE);
 		randomBtn.setFont(LABEL_FONT);
 		
-		constraints.gridx = 1;
+		constraints.gridx = 2;
 		constraints.insets.top = 5;
 		constraints.insets.left = 5;
 		panes[2].add(randomBtn, constraints);
 		
+		//establish controller
+		this.controller = new GameController(this, participants);
+		
 		//initiate all cells of the correct game
 		initCells();
-		
-		/*
-		 * Initiate the server communicator thread,
-		 * to send and receive information from the server during the game's session.
-		 */
-		this.serverCommunicator = new ServerCommunicator(this);
 		
 		//initiate crucial parts before the beginning of a game
 		init();
 		initPositions();
 		
 		//trigger the computer's first move manually if needed
-		if (mode == GameMode.SINGLE_PLAYER) triggerCompMove();
-	}
-	
-	/**
-	 * Manually trigger the computer's move.
-	 * If it isn't the computer's turn, do nothing.
-	 */
-	public void triggerCompMove() {
-		triggerCompMove(-1);
-	}
-	
-	/**
-	 * @see triggerCompMove()
-	 * @param sec - Seconds until the computer makes the move
-	 */
-	public void triggerCompMove(double sec) {
-		//if the first turn goes to a computer participant, trigger his move here
-		if (turnManager.is(Participant.COMPUTER)) {
-			aiTurn = new AITurn(turnManager, this);
-			
-			if (sec != -1) aiTurn.thinkAndExecute(sec);
-			else aiTurn.thinkAndExecute();
-		}
+		//if (mode == GameMode.SINGLE_PLAYER) controller.triggerCompMove();
 	}
 	
 	/**
@@ -170,6 +147,7 @@ public abstract class Controller extends State
 	 */
 	public void restart() {
 		stop(false);
+		controller.restart();
 		
 		//erase all cells
 		for (BoardCell[] cellRow : cells)
@@ -177,8 +155,6 @@ public abstract class Controller extends State
 				cell.erase();
 		
 		initPositions();
-		turnManager.set();
-		triggerCompMove(3);
 	}
 	
 	/**
@@ -186,8 +162,7 @@ public abstract class Controller extends State
 	 */
 	public void close() {
 		stop(true);
-		serverCommunicator.kill();
-		if (aiTurn != null) aiTurn.cancel();
+		controller.close();
 		vsPanel.close();
 	}
 	
@@ -205,9 +180,8 @@ public abstract class Controller extends State
 	 * @param flag - True to stop the game or false to continue
 	 */
 	public void stop(boolean flag) {
-		turnManager.stop(flag);
+		controller.stop(flag);
 		vsPanel.stop(flag);
-		if (aiTurn != null) aiTurn.cancel();
 		
 		//enable or disable all cells
 		for (BoardCell[] cellRow : cells)
@@ -223,11 +197,18 @@ public abstract class Controller extends State
 	public JPanel getGamePanel() { return panes[1]; }
 	
 	/**
+	 * @return the panel of the currently playing clients.
+	 */
+	public VSPanel getVSPanel() { return vsPanel; }
+	
+	/**
 	 * @param row - The cell's row in the matrix
 	 * @param col - The cell's column in the matrix
 	 * @return the cell in that position
 	 */
 	public BoardCell getCell(GameMove spot) { return cells[spot.getRow()][spot.getColumn()]; }
+	
+	public GameController getController() { return controller; }
 	
 	/**
 	 * @return the game that this controller controls.
@@ -239,10 +220,9 @@ public abstract class Controller extends State
 	 */
 	protected abstract Class<? extends BoardCell> getCellChildClass();
 	
-	/**
-	 * @return the thread that communicates with the server.
-	 */
-	public ServerCommunicator getCommunicator() { return serverCommunicator; }
+	protected abstract CountdownFacility createCountdownFacility();
+	
+	protected CountdownFacility getCountdownFacility() { return countdown; }
 	
 	/**
 	 * Initiate class members.
@@ -262,7 +242,7 @@ public abstract class Controller extends State
 		int cols = getRelatedGame().getBoardSize().width;
 		
 		//define the cells' size
-		Dimension overallDim = Percentage.createDimension(panes[1].getPreferredSize(), 80, 80);
+		Dimension overallDim = DimensionalHandler.adjust(panes[1].getPreferredSize(), 80, 80);
 		Dimension cellDim = new Dimension(overallDim.width / rows, overallDim.height / cols);
 		
 		//initiate cells array
@@ -276,8 +256,8 @@ public abstract class Controller extends State
 			for (int j = 0; j < cols; j++, constraints.gridx++) {
 				//create the cell using reflection
 				try { cells[i][j] = cellClass.asSubclass(BoardCell.class).
-					  getConstructor(int.class, int.class, TurnManager.class, Controller.class).
-					  newInstance(i, j, turnManager, this);
+					  getConstructor(int.class, int.class, GameController.class).
+					  newInstance(i, j, controller);
 				}
 				catch(Exception e) {
 					System.err.println("Could not initialize cells for " + getClass() + ".");

@@ -2,24 +2,24 @@ package com.hit.networking;
 import java.io.IOException;
 import com.hit.UI.windows.EndgameProtocol;
 import com.hit.game_launch.Game;
-import com.hit.game_session_control.Controller;
+import com.hit.game_session_control.GameView;
 import com.hit.players.Participant;
 import game_algo.GameBoard.GameMove;
 import game_algo.IGameAlgo.GameState;
-import javaNK.util.networking.JSON;
-import javaNK.util.networking.ResponseCase;
-import javaNK.util.networking.ResponseEngine;
+import javaNK.util.communication.JSON;
+import javaNK.util.communication.ResponseCase;
+import javaNK.util.communication.ResponseEngine;
 
 public class ServerCommunicator extends ResponseEngine
 {
-	private Controller controller;
+	private GameView controller;
 	private Game game;
 	
 	/**
 	 * @param controller - The Controller object of the game
 	 * @throws IOException when the client's protocol is unavailable.
 	 */
-	public ServerCommunicator(Controller controller) throws IOException {
+	public ServerCommunicator(GameView controller) throws IOException {
 		super(Participant.PLAYER_1.getStatus().getProtocol(), false);
 		
 		this.controller = controller;
@@ -125,13 +125,18 @@ public class ServerCommunicator extends ResponseEngine
 		JSON ans = protocol.request(message);
 		return ans.getBoolean("over");
 	}
+	
+	public void forceLoss() throws IOException {
+		JSON message = new JSON("force_loss");
+		protocol.send(message);
+	}
 
 	@Override
 	protected void initCases() {
 		//respond to a move, made by the other player
 		addCase(new ResponseCase() {
 			@Override
-			public String getType() { return "player2_move"; }
+			public String getCaseName() { return "player2_move"; }
 
 			@Override
 			public void respond(JSON msg) throws Exception {
@@ -145,7 +150,7 @@ public class ServerCommunicator extends ResponseEngine
 		//respond to the end of the game
 		addCase(new ResponseCase() {
 			@Override
-			public String getType() { return "end_game"; }
+			public String getCaseName() { return "end_game"; }
 
 			@Override
 			public void respond(JSON msg) throws Exception {

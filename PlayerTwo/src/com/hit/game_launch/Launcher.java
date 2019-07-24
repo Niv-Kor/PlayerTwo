@@ -2,10 +2,8 @@ package com.hit.game_launch;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
-
 import com.hit.UI.states.EndgameMessage;
 import com.hit.UI.states.GameModeState;
 import com.hit.UI.states.GamePickerState;
@@ -16,16 +14,15 @@ import com.hit.UI.windows.GameWindow;
 import com.hit.UI.windows.Mutable;
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Game.GameMode;
-import com.hit.game_session_control.Controller;
-import com.hit.game_session_control.catch_the_bunny.CatchTheBunnyController;
-import com.hit.game_session_control.tic_tac_toe.TicTacToeController;
+import com.hit.game_session_control.GameView;
+import com.hit.game_session_control.catch_the_bunny.CatchTheBunnyView;
+import com.hit.game_session_control.tic_tac_toe.TicTacToeView;
 import com.hit.networking.ClientProtocol;
 import com.hit.players.Avatar;
 import com.hit.players.Participant;
 import com.hit.players.PlayerStatus;
-
+import javaNK.util.communication.JSON;
 import javaNK.util.debugging.Logger;
-import javaNK.util.networking.JSON;
 
 public class Launcher {
 	/**
@@ -37,8 +34,8 @@ public class Launcher {
 		GAME_PICKER(GamePickerState.class),
 		IDENTIFICATION(IdentificationState.class),
 		GAME_MODE(GameModeState.class),
-		TIC_TAC_TOE(TicTacToeController.class),
-		CATCH_THE_BUNNY(CatchTheBunnyController.class),
+		TIC_TAC_TOE(TicTacToeView.class),
+		CATCH_THE_BUNNY(CatchTheBunnyView.class),
 		ENDGAME_MESSGE(EndgameMessage.class);
 		
 		private Class<? extends State> stateClass;
@@ -81,9 +78,9 @@ public class Launcher {
 				case "GamePickerState": new GamePickerState(testWindow); break;
 				case "IdentificationState": new IdentificationState(testWindow); break;
 				case "GameModeState": new GameModeState(testWindow); break;
-				case "TicTacToeController": new TicTacToeController(testWindow); break;
-				case "CatchTheBunnyController": new CatchTheBunnyController(testWindow); break;
-				case "EndgameMessage": new TicTacToeController(testWindow); break;
+				case "TicTacToeController": new TicTacToeView(testWindow); break;
+				case "CatchTheBunnyController": new CatchTheBunnyView(testWindow); break;
+				case "EndgameMessage": new TicTacToeView(testWindow); break;
 			}
 		}
 	}
@@ -222,9 +219,9 @@ public class Launcher {
 	 * @param game - Running game to get its controller
 	 * @return controller of that game. null if the game is currently not running.
 	 */
-	public static Controller getRunningGameController(Game game) {
+	public static GameView getRunningGameController(Game game) {
 		WindowCache cache = getWindowCache(game);
-		if (cache != null) return (Controller) cache.currentState;
+		if (cache != null) return (GameView) cache.currentState;
 		else return null;
 	}
 	
@@ -243,7 +240,7 @@ public class Launcher {
 		}
 		
 		//kill open threads in controller
-		Controller runningController = getRunningGameController(game);
+		GameView runningController = getRunningGameController(game);
 		runningController.close();
 		
 		//dispose game window and formally close the game

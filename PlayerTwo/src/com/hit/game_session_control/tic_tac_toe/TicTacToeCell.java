@@ -4,8 +4,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import com.hit.game_session_control.BoardCell;
-import com.hit.game_session_control.Controller;
-import com.hit.game_session_control.TurnManager;
+import com.hit.game_session_control.GameController;
+import com.hit.game_session_control.countdown.CountdownClock;
 import com.hit.players.Participant;
 import game_algo.GameBoard.GameMove;
 import javaNK.util.debugging.Logger;
@@ -14,9 +14,12 @@ public class TicTacToeCell extends BoardCell implements MouseListener
 {
 	private static final long serialVersionUID = -3294294011709456886L;
 	
-	public TicTacToeCell(int row, int col, TurnManager turnManager, Controller controller) {
-		super(row, col, turnManager, controller);
+	private CountdownClock clock;
+	
+	public TicTacToeCell(int row, int col, GameController controller) {
+		super(row, col, controller);
 		addMouseListener(this);
+		this.clock = (CountdownClock) controller.getCountdownFacility();
 	}
 
 	@Override
@@ -24,7 +27,11 @@ public class TicTacToeCell extends BoardCell implements MouseListener
 		if (turnManager.is(Participant.PLAYER_1) && enabled) {
 			try {
 				boolean success = controller.getCommunicator().makeMove(new GameMove(row, col));
-				if (success) placePlayer(Participant.PLAYER_1, true);
+				if (success) {
+					placePlayer(Participant.PLAYER_1, true);
+					clock.pause();
+					clock.hide(true);
+				}
 			}
 			catch (IOException e) { Logger.error(e); }
 		}
@@ -32,8 +39,12 @@ public class TicTacToeCell extends BoardCell implements MouseListener
 	
 	@Override
 	public void updateOtherPlayer() {
-		if (!turnManager.is(Participant.PLAYER_1) && enabled)
+		if (!turnManager.is(Participant.PLAYER_1) && enabled) {
 			placePlayer(Participant.PLAYER_2, true);
+			clock.reset();
+			clock.hide(false);
+			clock.run();
+		}
 	}
 	
 	@Override

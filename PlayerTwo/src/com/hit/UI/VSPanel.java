@@ -5,15 +5,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import com.hit.players.Participant;
-
 import javaNK.util.files.ImageHandler;
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 import javaNK.util.threads.DiligentThread;
 
 public class VSPanel extends JPanel
@@ -165,12 +162,12 @@ public class VSPanel extends JPanel
 		this.stopped = false;
 		
 		//initiate panes
-		Dimension playerPaneDim = Percentage.createDimension(getPreferredSize(), 25, 85);
-		Dimension centerPaneDim = Percentage.createDimension(getPreferredSize(), 50, 85);
+		Dimension playerPaneDim = DimensionalHandler.adjust(getPreferredSize(), 25, 85);
+		Dimension centerPaneDim = DimensionalHandler.adjust(getPreferredSize(), 50, 85);
 		
 		//north pane for dots above avatars when it's their turn
 		JPanel northPane = new JPanel(new GridBagLayout());
-		northPane.setPreferredSize(Percentage.createDimension(getPreferredSize(), 100, 15));
+		northPane.setPreferredSize(DimensionalHandler.adjust(getPreferredSize(), 100, 15));
 		northPane.setOpaque(false);
 		
 		//west pane for player 1 gauge

@@ -5,15 +5,12 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import com.hit.UI.windows.Window;
-
 import javaNK.util.files.FontHandler;
 import javaNK.util.files.FontHandler.FontStyle;
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public class HeaderPanel extends FixedPanel
 {
@@ -23,7 +20,7 @@ public class HeaderPanel extends FixedPanel
 		private static final double HEIGHT_PERCENT = 15;
 		
 		public SouthPanel(JPanel container) {
-			setPreferredSize(Percentage.createDimension(container.getPreferredSize(), 100, HEIGHT_PERCENT));
+			setPreferredSize(DimensionalHandler.adjust(container.getPreferredSize(), 100, HEIGHT_PERCENT));
 		}
 		
 		@Override
@@ -53,7 +50,7 @@ public class HeaderPanel extends FixedPanel
 		this.foreground = Color.WHITE;
 		
 		this.mainPanel = new JPanel(new GridBagLayout());
-		mainPanel.setPreferredSize(Percentage.createDimension(getPreferredSize(), 100, 100 - SouthPanel.HEIGHT_PERCENT));
+		mainPanel.setPreferredSize(DimensionalHandler.adjust(getPreferredSize(), 100, 100 - SouthPanel.HEIGHT_PERCENT));
 		mainPanel.setBackground(COLOR);
 		add(mainPanel, BorderLayout.CENTER);
 		

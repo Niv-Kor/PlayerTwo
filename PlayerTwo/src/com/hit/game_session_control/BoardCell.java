@@ -22,7 +22,7 @@ public abstract class BoardCell extends JPanel
 	protected static final Color PLAYER_1_COLOR = new Color(35, 154, 255);
 	protected static final Color PLAYER_2_COLOR = new Color(250, 37, 37);
 	
-	protected Controller controller;
+	protected GameController controller;
 	protected TurnManager turnManager;
 	protected JLabel sign;
 	protected int row, col;
@@ -34,7 +34,7 @@ public abstract class BoardCell extends JPanel
 	 * @param turnManager - The turn manager of the current game session
 	 * @param controller - The Controller object of the game
 	 */
-	public BoardCell(int row, int col, TurnManager turnManager, Controller controller) {
+	public BoardCell(int row, int col, GameController controller) {
 		super(new GridBagLayout());
 		setBorder(new BevelBorder(BevelBorder.RAISED));
 		setBackground(BACKGROUND_COLOR);
@@ -42,7 +42,7 @@ public abstract class BoardCell extends JPanel
 		this.controller = controller;
 		this.row = row;
 		this.col = col;
-		this.turnManager = turnManager;
+		this.turnManager = controller.getTurnManager();
 		this.enabled = true;
 		
 		this.sign = new JLabel();
@@ -69,7 +69,7 @@ public abstract class BoardCell extends JPanel
 	 * Reset cube.
 	 * @param control - Game's controller
 	 */
-	public void reset(Controller control) {
+	public void reset(GameController control) {
 		enable(true);
 		controller = control;
 		erase();

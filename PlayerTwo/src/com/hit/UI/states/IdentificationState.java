@@ -7,22 +7,19 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
 import com.hit.UI.fixed_panels.GuidePanel.Flow;
 import com.hit.UI.windows.Window;
 import com.hit.game_launch.Launcher.Substate;
 import com.hit.players.Avatar;
+import com.hit.players.Avatar.AvatarType;
 import com.hit.players.Participant;
 import com.hit.players.PlayerStatus;
-import com.hit.players.Avatar.AvatarType;
-
-import javaNK.util.math.Percentage;
+import javaNK.util.math.DimensionalHandler;
 
 public class IdentificationState extends ConfigState
 {
@@ -70,7 +67,7 @@ public class IdentificationState extends ConfigState
 		
 		//nickname
 		JPanel namePane = new JPanel(new GridBagLayout());
-		namePane.setPreferredSize(Percentage.createDimension(panes[0].getPreferredSize(), 100, 25));
+		namePane.setPreferredSize(DimensionalHandler.adjust(panes[0].getPreferredSize(), 100, 25));
 		namePane.setOpaque(false);
 		
 		JLabel nicnameLab = new JLabel("Nickname");
@@ -118,7 +115,7 @@ public class IdentificationState extends ConfigState
 		
 		//avatars
 		JPanel avatarPane = new JPanel(new GridBagLayout());
-		avatarPane.setPreferredSize(Percentage.createDimension(panes[0].getPreferredSize(), 100, 45));
+		avatarPane.setPreferredSize(DimensionalHandler.adjust(panes[0].getPreferredSize(), 100, 45));
 		avatarPane.setOpaque(false);
 		
 		//set default selection if player hasn't already chosen an avatar before

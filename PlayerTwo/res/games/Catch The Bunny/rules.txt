@@ -1,6 +1,4 @@
-The game is played with two players on a grid of 3x3.
+The game is played with two players on a grid of 9x9.
 
-Each player is either X or O.
-Players take turns putting their marks in empty squares, and the first one to get 3 of his marks in a row (horizontally, vertically, or diagonally) is the winner.
-
-When all 9 squares are full, the game ends in a tie.
+Each player plays as either the kid or the bunny.
+Players take turns moving their marks around the board, while the goal of the kid is to catch the bunny, and the goal of the bunny is to escape until the kid runs out of moves.
